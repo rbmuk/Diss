@@ -1,0 +1,58 @@
+\begin{thebibliography}{1}
+
+\bibitem{allenZhu2016variance}
+Z.~Allen-Zhu and E.~Hazan.
+\newblock Variance reduction for faster non-convex optimization.
+\newblock In {\em Proceedings of the 33rd International Conference on Machine
+  Learning}, volume~48 of {\em Proceedings of Machine Learning Research}, pages
+  699--707. PMLR, 2016.
+
+\bibitem{allenZhu2016linear}
+Z.~Allen-Zhu and L.~Orecchia.
+\newblock Linear coupling: An ultimate unification of gradient and mirror
+  descent.
+\newblock {\em arXiv preprint arXiv:1407.1537}, 2016.
+
+\bibitem{ghadimi2013stochastic}
+S.~Ghadimi and G.~Lan.
+\newblock Stochastic first- and zeroth-order methods for nonconvex stochastic
+  programming.
+\newblock {\em arXiv preprint arXiv:1309.5549}, 2013.
+
+\bibitem{jin2017escape}
+C.~Jin, R.~Ge, P.~Netrapalli, S.~M. Kakade, and M.~I. Jordan.
+\newblock How to escape saddle points efficiently.
+\newblock In {\em Proceedings of the 34th International Conference on Machine
+  Learning}, pages 1724--1732, 2017.
+
+\bibitem{jin2019short}
+C.~Jin, P.~Netrapalli, R.~Ge, S.~M. Kakade, and M.~I. Jordan.
+\newblock A short note on concentration inequalities for random vectors with
+  subgaussian norm.
+\newblock {\em arXiv preprint arXiv:1902.03736}, 2019.
+
+\bibitem{jin2017accelerated}
+C.~Jin, P.~Netrapalli, and M.~I. Jordan.
+\newblock Accelerated gradient descent escapes saddle points faster than
+  gradient descent.
+\newblock {\em arXiv preprint arXiv:1711.10456}, 2017.
+
+\bibitem{nesterov2017random}
+Y.~Nesterov and V.~Spokoiny.
+\newblock Random gradient-free minimization of convex functions.
+\newblock {\em Foundations of Computational Mathematics}, 17(2):527--566, 2017.
+
+\bibitem{ren2023escaping}
+Z.~Ren, Y.~Tang, and N.~Li.
+\newblock Escaping saddle points in zeroth-order optimization: The power of
+  two-point estimators.
+\newblock In {\em Proceedings of the 40th International Conference on Machine
+  Learning}, 2023.
+
+\bibitem{su2016differential}
+W.~Su, S.~Boyd, and E.~J. Cand{\`e}s.
+\newblock A differential equation for modeling nesterov's accelerated gradient
+  method: Theory and insights.
+\newblock {\em Journal of Machine Learning Research}, 17(153):1--43, 2016.
+
+\end{thebibliography}

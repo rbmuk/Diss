@@ -1,0 +1,328 @@
+\documentclass[twoside,11pt]{article}
+
+\usepackage[preprint]{jmlr2e}
+
+\usepackage{enumitem}
+\usepackage{graphicx,color}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bbm}
+
+\usepackage{amsmath, amsfonts, amssymb}
+\newtheorem{assumption}{Assumption}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{bm}
+
+\usepackage{physics}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+% Common shortcuts
+\def\mbb#1{\mathbb{#1}}
+\def\mfk#1{\mathfrak{#1}}
+
+\def\bN{\mbb{N}}
+\def \C{\mbb{C}}
+\def \R{\mbb{R}}
+\def\bQ{\mbb{Q}}
+\def\bZ{\mbb{Z}}
+\def \cph{\varphi}
+\renewcommand{\th}{\theta}
+\def \ve{\varepsilon}
+\newcommand{\mg}[1]{\| #1 \|}
+
+% Often helpful macros
+\newcommand{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil#1\right\rceil}
+\renewcommand{\P}{\mathbb P\qty}
+\newcommand{\E}{\mathbb{E}\qty}
+\newcommand{\Et}{\mathbb{E}_{\mathcal F_{t-1}} \qty}
+\newcommand{\Pt}{\mathbb{P}_{\mathcal F_{t-1}} \qty}
+\newcommand{\Cov}{\mathrm{Cov}\qty}
+\newcommand{\Var}{\mathrm{Var}\qty}
+
+\newcommand{\lr}{\mathrm{lr}}
+\renewcommand{\grad}{\nabla} 
+\newcommand{\1}{\mathbbm{1}}
+\newcommand{\Mirr}{\mathrm{Mirr}}
+
+% Sets
+\usepackage{braket}
+
+\graphicspath{{/}}
+\usepackage{float}
+
+\renewcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\given}{\;\middle|\;}
+
+\title{Zero Order Mirror Descent Convergence}
+\date{\today}
+\author{\name Rohan Mukherjee \email rohan.mukherjee@st-hildas.ox.ac.uk \\
+\addr Department of Computer Science \\
+University of Oxford}
+
+\begin{document}
+    \maketitle
+    In this excerpt we prove that Zero-Order Mirror Descent converges with high probability. 
+    \begin{assumption}
+        $f$ is $\rho$-Lipschitz continuous and convex over a closed convex set $Q \subset \R^d$.
+    \end{assumption}
+
+    \begin{definition}
+        $w: Q \to \R^d$ is a DGF if it is 1-strongly convex w.r.t. $\mg{\cdot}$, in symbols, $w(y) \geq w(x) + \langle \grad w(x), y-x \rangle + \frac 12 \mg{y-x}^2$. The Bregman divergence is defined
+        \begin{align*}
+            V_x(y) = w(y) - \langle \grad w(y), y-x \rangle - w(x) 
+        \end{align*}
+        We have $V_x(x) = 0$ and $V_x(y) \geq \frac 12 \mg{x-y}^2 \geq 0$. 
+    \end{definition}
+    Classic examples are $w(x) = \frac 12 \mg{x}_2^2$ for the $\ell^2$ norm which gives $V_x(y) = \frac 12 \mg{y-x}_2^2$, and $w(y) = \sum_i y_i \log(y_i)$ for the $\ell^1$ norm with $Q = \Delta$, which gives KL divergence $V_x(y) = \sum_i y_i \log(y_i/x_i) \geq \frac 12 \mg{x-y}^2_1$. 
+
+    \section{Classic Mirror Descent}
+    \begin{definition}[Mirror Descent Step]
+        The mirror descent step with step length $\alpha$ is 
+        \begin{align*}
+            x^+ = \Mirr_x(\alpha \grad f(x)) \quad \text{where} \quad \Mirr_x(\xi) = \underset{y \in Q}{\mathrm{argmin}} \set{V_x(y) + \langle \xi, y-x \rangle }.
+        \end{align*}
+    \end{definition}
+
+    Mirror descents core lemma is this:
+    \begin{lemma}
+        \label{lem:mirror-descent}
+        If $x_{t+1} = \Mirr_{x_t}(\alpha \grad f(x_k))$, then
+        \begin{align*}
+            \forall u \in Q,\quad \alpha (f(x_t) - f(u)) \leq \alpha \langle \grad f(x_t), x_t-u \rangle \leq \frac{\alpha^2}{2} \mg{\grad f(x_t)} + V_{x_t}(u) - V_{x_{t+1}}(u).
+        \end{align*}
+    \end{lemma}
+    \begin{proof}
+        Notice
+        \begin{align*}
+            \alpha \langle \grad f(x_t), x_t - u \rangle = \langle \alpha \grad f(x_t), x_t-x_{t+1} \rangle + \langle \grad f(x_t), x_{t+1} - u \rangle
+        \end{align*}
+        Since $Q$ is convex and $x_{t+1} = \Mirr_{x_t}(\alpha \grad f(x))$ is minimal, it satisfies the first order condition
+        \begin{align*}
+            \langle \grad V_{x_t}(x_{t+1}) + \alpha \grad f(x_t), u - x_{t+1} \rangle \geq 0 \quad \forall u \in Q
+        \end{align*}
+        Therefore the above is at most 
+        \begin{align*}
+            \langle \alpha \grad f(x_t), x_t - x_{t+1} \rangle + \langle - \grad V_{x_k}(x_{t+1}), x_{t+1} - u \rangle
+        \end{align*}
+        Using the three-point identity
+        \begin{align*}
+            \langle - \grad V_x(y) , y-u \rangle = V_x(u) - V_y(u) - V_x(y)
+        \end{align*}
+        we get the above equals
+        \begin{align*}
+            &\langle \alpha \grad f(x_t), x_t - x_{t+1} \rangle + V_{x_t}(u) - V_{x_{t+1}}(u) - V_{x_t}(x_{t+1}) \\
+            \leq &\qty(\langle \alpha \grad f(x_t), x_t-x_{t+1} \rangle - \frac 12 \mg{x_t-x_{t+1}}^2) + (V_{x_t}(u) - V_{x_{t+1}}(u)) \\
+            &\leq \frac{\alpha^2} 2 \mg{\grad f(x_t)}^2 + (V_{x_t}(u) - V_{x_{t+1}}(u))
+        \end{align*}
+        After recalling that $V_x(y) \geq \frac{1}{2}\mg{x-y}^2$, using Cauchy-Schwarz $\langle a, b \rangle \leq \mg{a} \cdot \mg{b}$ and Young's inequality $2ab \leq a^2 + b^2$ in that order.
+
+        The first inequality follows because by convexity $f(u) \geq f(x_t) + \langle \grad f(x_t), u-x_t \rangle$.
+    \end{proof}
+    Using this, we can prove Mirror descent converges.
+    \begin{lemma}
+        \label{lem:classic-tele}
+        For $\bar x = \frac{1}{T} \sum_{t=0}^{T-1} f(x_t)$, if we choose $\alpha = \sqrt{2\Theta / \rho^2 T}$, we have
+        \begin{align*}
+            f(\bar x) - f(x^*) \leq \rho \sqrt{\frac{2\Theta }{T}}
+        \end{align*}
+    \end{lemma}
+    \begin{proof}
+        Telescoping, we get
+        \begin{align*}
+            \sum_{t=0}^{T-1} \alpha (f(x_t) - f(x^*)) \leq \sum_{t=0}^{T-1} \frac{\alpha^2}{2} \mg{\grad f(x_t)}^2 + V_{x_0}(x^*) - V_{x_T}(x^*)
+        \end{align*}
+        Using convexity, $f(\bar x) \leq 1/T \sum_{t=0}^{T-1} f(x_t)$, and recalling that $f$ is $\rho$-Lipschitz continuous, we have
+        \begin{align*}
+            f(\bar x) - f(x^*) \leq \frac{\alpha}{2} \rho^2 + \frac{1}{\alpha} \Theta,
+        \end{align*}
+        where $\Theta$ is any number satisfying $\Theta \geq V_{x_0}(x^*)$. Now by choosing $\alpha = \sqrt{2\Theta / \rho^2 T}$ to balance the two terms, we are done. 
+    \end{proof}
+
+    \section{Zero-Order Mirror Descent}
+    Throughout the rest of this excerpt the norm $\mg{\cdot}$ is the $\ell^2$ norm and $Q = \R^d$. 
+    
+    Now, notice that the only place in the proof of Lemma~\ref{lem:mirror-descent} where we used that the update is evaluated at the true gradient $\grad f(x_k)$ was to upper bound $f(x_k) - f(u)$. The gradient was not used in the proof, actually. So we get this lemma for free:
+    \begin{lemma}
+        If $x_{k+1} = \Mirr_{x_k}(\alpha g_k)$, then
+        \begin{align*}
+         \forall u \in Q \quad \alpha \langle g_k, x_k-u \rangle \leq \frac{\alpha^2}{2} \mg{g_k}^2 + V_{x_k}(u) - V_{x_{k+1}}(u).
+        \end{align*}
+    \end{lemma}
+    Notice now that for any $u \in Q$, 
+    \begin{align*}
+        \alpha (f(x_k) - f(u)) \leq \alpha \langle \grad f(x_k), x_k - u \rangle  = \alpha \langle \tilde \grad f(x_k), x_k - u \rangle + \alpha \langle \grad f(x_k) - \tilde \grad f(x_k), x_k - u \rangle  
+    \end{align*}
+    \begin{definition}[Zero-Order Estimator]
+        The Zero-Order gradient estimator is defined as follows
+        \begin{align*}
+            \widetilde{\grad} f(x) = \frac{f(x+\sigma p) - f(x-\sigma p)}{2\sigma} \cdot p
+        \end{align*}
+        where $p \sim \mathcal N(0,I_d)$. 
+    \end{definition}
+    For simplicity of exposition we will  initially assume there is no quadratic error and $\tilde \grad f(x_t) = p_tp_t^\top \grad f(x_t)$. Thus the above equals,
+    \begin{align}
+        &\alpha \langle \grad \tilde f(x_t), x_t-u \rangle + \alpha \langle (I-p_tp_t^\top) \grad f(x_t), x_t-u \rangle \notag \\
+        &\leq \frac{\alpha^2}{2} \mg{\tilde \grad f(x_t)}^2 + V_{x_t}(u) - V_{x_{t+1}}(u) + \alpha \langle (I-p_tp_t^\top) \grad f(x_t), x_t-u \rangle \label{eq:telescope}
+    \end{align}
+    This lemma explains how to deal with the first term.
+    \begin{lemma}
+        \label{lem:est-bound}
+        With probability at least $1-\delta$, we have for every $1 \leq t \leq T$,
+        \begin{align*}
+            |p_tp_t^\top \grad f(x_t)| \leq c \sqrt{d} \log(cT/\delta)^{3/2} \mg{\grad f(x_t)}
+        \end{align*}
+    \end{lemma}
+    \begin{proof}
+        See Theorem 6 from EGGROLL convergence.
+    \end{proof}
+    The main idea behind the rest of this proof is that the mean-0 martingale error
+    \begin{align*}
+        \sum_{t=0}^{T-1} \alpha \langle (I-p_kp_k^\top) \grad f(x_k), x_k-u \rangle
+    \end{align*}
+    can hopefully be bounded by the other terms of the equation. In this case, it ends up being the ``energy'' term $V_{x_t}(u)$ and the Lipschitz constant $\rho$. 
+
+
+    The main lemma which is different from the normal mirror descent bounds is the following.
+    \begin{lemma}
+    Let $\set{\mathcal F_t}$ be a filtration. Assume that $g_t, d_t \in \mathcal F_{t-1}$, and assume $p_t \sim \mathcal N(0,I)$ with $p_t \in \mathcal F_t$, $p_t \perp \mathcal F_{t-1}$. Define
+    \begin{align*}
+        E_\tau = \sum_{t=0}^{\tau-1} g_t^\top (I-p_tp_t^\top) d_t
+    \end{align*}
+    Then for any $\theta$, $0 < \delta < 1/e$, with probability at least $1-\delta$,
+    \begin{align*}
+        |E_\tau| \leq c\theta \sum_{t=0}^{\tau-1} \log(\frac{c\tau}{\delta}) \mg{g_t}^2 \mg{d_t}^2 + \frac1\theta \log(\frac {c\tau}{\delta}).
+    \end{align*}
+    \end{lemma}
+    \begin{proof}
+        For each $t$ let
+        \begin{align*}
+            A_t = \set{L_\delta \leq |p_t^\top d_t| \leq \sqrt{3 \log(c/\delta) \mg{d_t}^2}}, \quad \Pt(A_t) \geq 1-\delta
+        \end{align*}
+        Then by a lemma from before we know that $\Et[(I-p_tp_t^\top) d_t ; A_t] = 0$. In particular,
+        \begin{align*}
+            \Et[g_t^\top (I-p_tp_t^\top) d_t ; A_t] = 0.
+        \end{align*} 
+        Dropping the subscript $t$ for simplicity,
+        \begin{align*}
+            \E[\exp(\frac{(g^\top p p^\top d \1_A)^2}{t^2})] \leq \E[\exp(\frac{3 \log(C/\delta) \mg{d_t}^2(p^\top g)^2}{t^2})]
+        \end{align*}
+        Now, $p^\top g$ is $\mathcal N(0, \mg{g}^2)$ random variable. Therefore, $\E[\exp((p^\top g)^2 / 4\mg{g}^2)] \leq 2$. Now, taking $c \geq 1$ and $0 < \delta \leq 1/e$, we have
+        \begin{align*}
+            (g^\top (I-pp^\top) d)^2 \leq 2(g^\top d)^2 + 2 (g^\top p p^\top d)^2 
+        \end{align*} 
+        So, the random variable $Q_t = g_t^\top (I-p_tp_t^\top) d_t \1_{A_t}$ is $24\mg{g_t}^2 \mg{d_t}^2 \log(C/\delta)$ subgaussian and mean 0 given $\mathcal F_t$. Thus by the  (subgaussian) Hoeffding inequality with probability at least $1-\delta$ for any $\theta$,
+        \begin{align*}
+            \left |\sum_{t=0}^{\tau-1} Q_t  \right|\leq c \theta \sum_{t=0}^{\tau-1} \log(c/\delta) \mg{g_t}^2 \mg{d_t}^2 + \frac 1 \theta \log(\frac{c}{\delta})
+        \end{align*}
+        Now $\sum_{t=0}^{\tau-1} Q_t  = E_\tau$ on $\bigcap A_t$. Notice, since $\P(A_t) \geq 1-\delta$, $\P(\bigcap A_t) \geq 1-\tau \delta$. Therefore with probability at least $1-(\tau+1) \delta$, $E_\tau$ satisfies the same bound as above. Rescaling $\delta$ to $\delta/(\tau+1)$ and we have completed the proof.
+    \end{proof}
+    This above lemma is the key for making the argument work. Because $V_x(y) \geq \frac 12 \mg{x-y}^2$, and recalling that $f$ is $\rho$-Lipschitz continuous, we have
+    \begin{align*}
+        \left|\sum_{t=0}^{\tau-1} \alpha \langle (I-p_tp_t^\top) \grad f(x_t), x_t - u \rangle \right| \leq \alpha\sqrt{c \sum_{t=0}^{\tau-1} \log^{3/2}(c\tau/\delta) \rho^2 V_{x_t}(u)}
+    \end{align*}
+    after rescaling $c$ and by choosing the optimal $\theta$ according to AM-GM $(x+y)/2 \geq \sqrt{xy}$. So, it remains to bound $\sum V_{x_t}(u)$. We can do this because Lemma~\ref{lem:classic-tele} actually tells us a bound on $V_{x_\tau}(x^*)$. 
+
+    So, by telescoping Equation~\eqref{eq:telescope}, we arrive at the following lemma.
+    \begin{lemma}
+        Define $\chi = \log(cT^2 / \delta)$. Then with probability at least $1-\delta$, for every $1 \leq \tau \leq T$,
+        \begin{align*}
+            V_{x_\tau}(x^*) \leq \frac{c \tau d \chi^{3/2} \alpha^2}{2} \rho^2 + V_{x_0}(x^*) + \alpha \rho \sqrt{c \sum_{t=0}^{\tau-1} \chi^{3/2} V_{x_t}(x^*)}
+        \end{align*}
+    \end{lemma}
+\begin{proof}
+    Telescoping Equation~\eqref{eq:telescope}, we get
+    \begin{align*}
+        \sum_{t=0}^{\tau-1} \alpha (f(x_t) - f(x^*)) &\leq \sum_{t=0}^{\tau-1} \frac{\alpha^2}{2} \mg{\tilde \grad f(x_t)}^2 + V_{x_0}(x^*) - V_{x_\tau}(x^*) 
+        \\&\quad+ \sum_{t=0}^{\tau-1} \alpha \langle (I-p_tp_t^\top) \grad f(x_t), x_t - x^* \rangle 
+    \end{align*}
+    Therefore, by the previous discussion, by Lemma~\ref{lem:est-bound} and using that $f(x_t) \geq f(x^*)$ for any $x_t$,
+    \begin{align*}
+        V_{x_\tau}(x^*) \leq \frac{c\tau d \chi^{3/2} \alpha^2}{2} \rho^2 + V_{x_0}(x^*) + \alpha \rho \sqrt{c \sum_{t=0}^{\tau-1} \log^{3/2}(c\tau/\delta) V_{x_t}(x^*)}
+    \end{align*}
+    We can have this hold jointly for all $ 1 \leq \tau \leq T$ by rescaling $\delta \gets \delta/T$. Then by using $\tau \leq T$, we arrive at the statement of the lemma.
+\end{proof}
+Naturally, this above lemma should tell us how much $V_{x_t}(x^*)$ can grow. This next lemma tells us an upper bound on how much that is.
+\begin{lemma}
+    Let $\Theta$ be any upper bound on $V_{x_0}(x^*)$. Then for some absolute constant $c$,
+    \begin{align*}
+        \sup_{0 \leq t \leq T} V_{x_t}(x^*) \leq 2\Theta + cd\alpha^2 \rho^2  \chi^{3/2} T
+    \end{align*}
+\end{lemma}
+\begin{proof}
+    Define $M = \sup_{0 \leq t \leq T} V_{x_t}(x^*)$. Notice that the right hand side is increasing in $\tau$. Therefore applying sup to both sides, we get
+    \begin{align*}
+        M &\leq \frac{cT d \chi^{3/2} \alpha^2}{2} \rho^2 + \Theta + \alpha \rho \sqrt{c \sum_{t=0}^{T-1} \chi^{3/2} V_{x_t}(x^*)} \\
+        &\leq \frac{cT d \chi^{3/2} \alpha^2}{2} \rho^2 + \Theta + \alpha \rho \sqrt{c T \chi^{3/2} M}
+    \end{align*}
+    Using Young's inequality, we know that
+    \begin{align*}
+        \alpha \rho \sqrt{cT\chi^{3/2} M} \leq \frac 12 M + c\alpha^2 \rho^2 \chi^{3/2} T 
+    \end{align*}
+    Therefore,
+    \begin{align*}
+        M &\leq cTd \chi^{3/2} \alpha^2 \rho^2 + 2\Theta + 2c\alpha^2 \rho^2 \chi^{3/2} T \\
+        &\leq 2\Theta + cd\alpha^2 \rho^2 \chi^{3/2} T
+    \end{align*}
+    for some absolute constant $c$ as desired.
+\end{proof}
+A natural question is: Is this a good bound at all? Shouldn't $x_t$ be getting closer to the minmizer $x^*$? But we showed $V_{x_t}(x^*)$ grows linearly? 
+
+To answer this, recall from before that $\alpha = \sqrt{2\Theta / \rho^2 T}$. Ignoring the polylog factor $\chi^{3/2}$, and dimension $d$, we have actually shown that $V_{x_t}(x^*)$ stays bounded. But still, shouldn't it be decreasing to 0? Actually, it should not, since $f$ could have many minimizers. The best bound you could hope to satisfy for every $f$ is that it is just bounded. 
+
+For a similar choice of $\alpha$, this tells us the accumulated error 
+\begin{align*}
+    \sum_{t=0}^{T-1} \alpha \langle (I-p_tp_t^\top) \grad f(x_t), x_t-x^* \rangle
+\end{align*}
+is around the same size as $V_{x_0}(x^*)$. This observation is what let's us prove convergence of Zero-Order mirror descent.
+
+\begin{theorem}[Zero-Order Mirror Descent Convergence]
+    Let $\bar x = 1/T \sum_{t=0}^{T-1} x_t$, if we choose
+    \begin{align*}
+        \alpha = \sqrt{\frac{2\Theta}{\rho^2 c \chi^{3/2} T d}}
+    \end{align*}
+    then with probability at least $1-\delta$,
+    \begin{align*}
+        f(\bar x) - f(x^*) \leq \frac{1}{T\alpha} \cdot 9\Theta = \widetilde{O}\left(\rho \sqrt{\frac{\Theta d}{T}}\right)
+    \end{align*}
+\end{theorem}
+\begin{proof}
+    By telescoping and using $V_{x_T}(x^*) \geq 0$, we get
+    \begin{align*}
+        \sum_{t=0}^{T-1} \alpha (f(x_t) - f^*) \leq \frac{cTd \chi^{3/2} \alpha^2}{2} \rho^2 + \Theta + \alpha \sqrt{c \sum_{t=0}^{T-1} \chi^{3/2} \rho^2 V_{x_t}(x^*)}
+    \end{align*}
+    By using the previous lemma, we know that
+    \begin{align*}
+        \alpha \sqrt{c \sum_{t=0}^{T-1} \chi^{3/2} \rho^2 V_{x_t}(x^*)} \leq \alpha \sqrt{cT\chi^{3/2} \rho^2(2\Theta + c \alpha^2 \rho^2 \chi^{3/2} T)}
+    \end{align*}
+    By choosing $\alpha = \sqrt{2\Theta / \rho^2 c \chi^{3/2} T d}\leq \sqrt{2\Theta / \rho^2 c \chi^{3/2} T}$ as $d \geq 1$, we know that
+    \begin{align*}
+        c \alpha^2 \rho^2 \chi^{3/2} T \leq 2\Theta
+    \end{align*}
+    and therefore,
+    \begin{align*}
+        \alpha \sqrt{cT\chi^{3/2} \rho^2(2\Theta + c \alpha^2 \rho^2 \chi^{3/2} T)} \leq 4\Theta
+    \end{align*}
+    Now again by our choice of $\alpha$,
+    \begin{align*}
+        \frac{cT d \chi^{3/2} \alpha^2}{2} \rho^2 \leq 4\Theta
+    \end{align*}
+    Therefore,
+    \begin{align*}
+        \alpha (f(\bar x) - f^*) \leq \frac{9\Theta}{T}
+    \end{align*}
+    We conclude,
+    \begin{align*}
+        f(\bar x) - f^* \leq \frac{9\Theta}{T \alpha} = \rho c \sqrt{\frac 92} \sqrt{\frac{d\Theta}{T}} \chi^{3/4} = \widetilde{O}\left(\rho \sqrt{\frac{d \Theta}{T}}\right).
+    \end{align*}
+\end{proof}
+\section{Relaxing The Quadratic Error Assumption}
+TODO
+\end{document}
