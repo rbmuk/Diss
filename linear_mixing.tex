@@ -1,0 +1,347 @@
+\documentclass[twoside,11pt]{article}
+
+\usepackage[preprint]{jmlr2e}
+
+\usepackage{enumitem}
+\usepackage{graphicx,color}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bbm}
+
+\usepackage{amsmath, amsfonts, amssymb}
+\newtheorem{assumption}{Assumption}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{bm}
+
+\usepackage{physics}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+% Common shortcuts
+\def\mbb#1{\mathbb{#1}}
+\def\mfk#1{\mathfrak{#1}}
+
+\def\bN{\mbb{N}}
+\def \C{\mbb{C}}
+\def \R{\mbb{R}}
+\def\bQ{\mbb{Q}}
+\def\bZ{\mbb{Z}}
+\def \cph{\varphi}
+\renewcommand{\th}{\theta}
+\def \ve{\varepsilon}
+\newcommand{\mg}[1]{\| #1 \|}
+
+% Often helpful macros
+\newcommand{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil#1\right\rceil}
+\renewcommand{\P}{\mathbb P\qty}
+\newcommand{\E}{\mathbb{E}\qty}
+\newcommand{\Et}{\mathbb{E}_{\mathcal F_{t-1}} \qty}
+\newcommand{\Pt}{\mathbb{P}_{\mathcal F_{t-1}} \qty}
+\newcommand{\Cov}{\mathrm{Cov}\qty}
+\newcommand{\Var}{\mathrm{Var}\qty}
+
+\newcommand{\lr}{\mathrm{lr}}
+\renewcommand{\grad}{\nabla} 
+\newcommand{\1}{\mathbbm{1}}
+\newcommand{\Mirr}{\mathrm{Mirr}}
+
+% Sets
+\usepackage{braket}
+
+\graphicspath{{/}}
+\usepackage{float}
+
+\renewcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\given}{\;\middle|\;}
+
+\title{Zero Order Accelerated Gradient Descent By Linear Mixing}
+\date{\today}
+\author{\name Rohan Mukherjee \email rohan.mukherjee@st-hildas.ox.ac.uk \\
+\addr Department of Computer Science \\
+University of Oxford}
+
+\begin{document}
+\maketitle
+\begin{assumption}
+    We assume that the smoothness constant of $f$ is $L \geq 1$. Otherwise, we can replace it with 1. Also assume that $0 < \delta < 1/e$.
+\end{assumption}
+
+We use the linear mixing framework to design an accelerated zero-order gradient descent algorithm. The idea is to query gradient descent $y_t$ and mirror descent $z_t$ at the same point $x_t$, and then linearly mix the answers $x_{t+1} = \lambda z_t + (1-\lambda) y_t$. The algorithm can be described as
+\begin{align*}
+    x_{t+1} &= \lambda y_t + (1-\lambda) z_t \\
+    y_{t+1} &= x_{t+1} - \eta \tilde \grad f(x_{t+1}) \\
+    z_{t+1} &= \Mirr_{z_t}(\alpha \tilde \grad f(x_{t+1}))
+\end{align*}
+The first thing to do is to deal with quadratic error. 
+\begin{lemma}[Quadratic Error]
+    \begin{align*}
+        \mg{\tilde \grad f(x) - \frac 1r \sum_{i=1}^r p_ip_i^\top \grad f(x)} \leq L \sigma \frac 1r \sum_{i=1}^r \mg{p_i}^3
+    \end{align*}
+\end{lemma}
+\begin{proof}
+    We have
+    \begin{align*}
+        \frac{f(x+\sigma p) - f(x-\sigma p)}{2 \sigma}p - pp^\top \grad f(x) &= \frac{1}{2\sigma} \left[\int_{-1}^1  \dv{t} f(x + t \sigma p) - \sigma pp^\top \grad f(x)dt \right ] \\
+        &= \frac 1{2\sigma} \left[\int_{-1}^1 \langle \grad f(x+t \sigma p) - \grad f(x), \sigma p \rangle p dt \right]
+    \end{align*}
+    Now, by $L$-smoothness,
+    \begin{align*}
+        \left|\int_{-1}^1 \langle \grad f(x+\sigma t p) - \grad f(x), \sigma p \rangle p dt \right| \leq \int_{-1}^1 L \sigma^2 |t| \mg{p}^3 dt
+    \end{align*}
+    Therefore,
+    \begin{align*}
+        \left|\frac{f(x+\sigma p) - f(x-\sigma p)}{2 \sigma}p - pp^\top \grad f(x)\right| \leq L \sigma \mg{p}^3
+    \end{align*}
+    Then by triangle inequality,
+    \begin{align*}
+        \mg{\tilde \grad f(x) - \frac 1r \sum_{i=1}^r p_ip_i^\top \grad f(x)} \leq L \sigma \frac 1r \sum_{i=1}^r \mg{p_i}^3.
+    \end{align*}
+    \end{proof}
+    Unfortunately, this bound is necessary. Ideally we would like to just say that $f(x+\sigma p) - f(x-\sigma p) / 2 \sigma p = pp^\top \grad g(x)$ for some function $g(x)$ related to $f(x)$. Possibly a smoothed variant $f_\sigma$. But this cannot possible hold for every $p$ unless $f$ is quadratic in a neighborhood of $x$. To see this, we can use MVT to expand the LHS as $\langle \grad f(x+\theta \sigma p), p \rangle p$. By taking $p = e_i$, we see that $e_i^\top \grad g(x) = e_i^\top \grad f(x+\theta_i \sigma e_i)$. Sending $\sigma \to 0$, $\grad f(x+\theta_i \sigma e_i) \to \grad f(x)$ under $L$-smoothness assumption, meaning that $\grad g(x) = \grad f(x)$. This would say that $f$ is quadratic, which is not true in general.
+
+    Recall the following lemma from before.
+    \begin{lemma}
+        Let $X$ follow $\chi^2_d$ distribution and $0 < \delta < 1/e$. Then there exists $L_{\delta}$ such that for every $d$, with
+        \begin{align*}
+            A \coloneqq \set{dL_{\delta}^2 \leq X \leq 3d\log(C/\delta)}
+        \end{align*}
+        we have
+        \begin{align*}
+            \E[(X-d) ; A] = 0, \quad \P(A) \geq 1-\delta
+        \end{align*}
+        for some absolute constant $C$.
+    \end{lemma}
+    These lemmas tell us how much progress the gradient descent step is making.
+    \begin{lemma}[\citet{vershynin2018high} Corollary 7.3.2]
+        Let $P \in \R^{d \times r}$ be a matrix with i.i.d. Gaussian entries. Define $\mg{A}_{\mathrm{op}} = \sup_{u \in \mathbb S^{r-1}} \mg{Au}_2$. Then
+        \begin{align*}
+            \P(\mg{P}_{\mathrm{op}} \geq \sqrt{d} + \sqrt{r} + s) \leq 2e^{-cs^2}
+        \end{align*}
+    \end{lemma}
+    \begin{proposition}
+    Define $\chi = \log(CrT/\delta)$ and let $P_t = \begin{bmatrix} p_{t,1} & \cdots & p_{t,r} \end{bmatrix}$. Define the bounded operator norm event
+        \begin{align*}
+            \mathfrak O_t = \set{\frac{1}{\sqrt{r}}\mg{P}_{\mathrm{op}} \leq C\frac{d}{r} \sqrt{\log(cTr / \delta)}}
+        \end{align*}
+        Then on $\mathfrak O_t$, for every $0 \leq t \leq T-1$, 
+        \begin{align*}
+            \left\|\frac 1r \sum_{i=1}^r p_{t,i}p_{t,i}^\top \grad f(x_t) \right\|^2 \leq \frac{Cd}{r} \log(cTr/\delta) \cdot \frac 1r \sum_{i=1}^r |p_{t,i}^\top \grad f(x_t)|^2
+        \end{align*}
+        Furthermore, 
+        \begin{align*}
+            \P(\bigcap_{t=0}^{T-1} \mathfrak O_t) \geq 1 - \delta/3
+        \end{align*}
+    \end{proposition}
+    \begin{proof}
+        Write $P = \begin{bmatrix}
+            p_{t,1} & \cdots & p_{t,r}
+        \end{bmatrix} \in \R^{d \times r}$. By choosing $s = \sqrt{1/c \log(2/\delta)}$ above, we know that 
+        \begin{align*}
+            \frac{1}{\sqrt{r}} \mg{P}_{\mathrm{op}} \leq 1 + \sqrt{\frac{d}{r}} + \frac{1}{c\sqrt{r}} \sqrt{\log(c/\delta)} \leq C\sqrt{\frac{d}{r}} \sqrt{\log(c/\delta)}
+        \end{align*}
+        with probability at least $1-\delta$. As $PP^\top = \sum_{i=1}^r p_{t,i}p_{t,i}^\top$, we see that
+        \begin{align*}
+            \left \|\frac 1r PP^\top \grad f(x_t) \right \|^2 \leq \qty(\frac{1}{\sqrt{r}}\mg{P}_{\mathrm{op}})^2 \frac 1r \mg{P^\top \grad f(x_t)}^2 \leq \frac{Cd}{r} \log(c/\delta) \frac 1r \sum_{i=1}^r |p_{t,i}^\top \grad f(x_t)|^2
+        \end{align*}
+        We then rescale $\delta$ to $\delta/Tr$ to complete the proof. 
+    \end{proof}
+    \begin{lemma}
+        Define the bounded $p$s event
+        \begin{align*}
+            \mathfrak B_{t+1} \coloneqq \bigcap_{i=1}^r \set{\sqrt{dL_{\delta/rT}} \leq \mg{p_{t+1,i}} \leq \sqrt{3d \chi}}
+        \end{align*}
+        Then on $\mathfrak B_{t+1}$, as long as $\eta \leq r/(12Ld \chi)$, we have
+        \begin{align*}
+            f(y_{t+1}) \leq f(x_{t+1}) - \frac{3\eta}{4r} \sum_{i=1}^r |p_i^\top \grad f(x_{t+1})|^2 + \frac{\eta^2}{\alpha} \mg{\grad f(x_{t+1})}^2 + (\alpha+1)CL^2 \sigma^2 \chi^3 d^{3} 
+        \end{align*}
+        Furthermore, 
+        \begin{align*}
+            \P(\bigcap_{t=0}^{T-1}\mathfrak B_{t}) \geq 1-\delta/3
+        \end{align*}
+    \end{lemma}
+    \begin{proof}
+        By $L$-smoothness,
+        \begin{align*}
+            f(y_{t+1}) &\leq f(x_{t+1}) + \langle \grad f(x_{t+1}), y_{t+1} - x_{t+1} \rangle + \frac{L}{2} \mg{y_{t+1} - x_{t+1}}^2 \\
+            &= f(x_{t+1}) - \eta \langle \grad f(x_{t+1}), \tilde \grad f(x_{t+1}) \rangle + \frac{L\eta^2}{2} \mg{\tilde \grad f(x_{t+1})}^2
+        \end{align*}
+        Writing $\tilde \grad f(x_{t+1}) = \frac 1r \sum_{i=1}^r p_ip_i^\top \grad f(x_{t+1}) + R_{t+1}$, we get
+        \begin{align*}
+            f(y_{t+1}) &\leq f(x_{t+1}) - \frac{\eta}{r} \sum_{i=1}^r|p_i^\top \grad f(x_{t+1})|^2 - \eta \langle \grad f(x_{t+1}), R_{t+1} \rangle   \\
+            &\quad +L \eta^2 \mg{\frac 1r \sum_{i=1}^r p_ip_i^\top \grad f(x_{t+1})}^2 + L \eta^2 \mg{R_{t+1}}^2
+        \end{align*}
+        Now, $2\langle \eta \grad f(x_{t+1}), R_{t+1} \rangle \leq \eta^2 / \alpha \mg{\grad f(x_{t+1})}^2 + \alpha R_{t+1}^2$ by Cauchy-Schwarz and Young's inequality.
+
+        Define the event where $p_i$ are bounded:
+        \begin{align*}
+            \mathfrak B_{t+1} \coloneqq \bigcap_{i=1}^r \set{\sqrt{dL_{\delta/rT}} \leq \mg{p_{t+1,i}} \leq \sqrt{3d \chi}}
+        \end{align*}
+        We know that $\P(\mathfrak B_{t+1}) \geq 1 - \delta/rT$. Thus,
+        \begin{align*}
+            f(y_{t+1}) &\leq f(x_{t+1}) - \frac{\eta}{r} \sum_{i=1}^r |p_i^\top \grad f(x_{t+1})|^2 + \frac{\eta^2}{\alpha} \mg{\grad f(x_{t+1})}^2 + (L\eta^2 + \alpha)\mg{R_{t+1}}^2 \\
+            &\quad + \frac{CLd \eta^2  \log(Tr/\delta)}{r} \cdot \frac 1r \sum_{i=1}^r |p_i^\top \grad f(x_{t+1})|^2
+        \end{align*}
+        From quadratic error lemma we know that $|R_{t+1}| \leq 3L \sigma \log^{3/2}(1/\delta) d^{3/2}$. Now by choosing $\eta \leq r/(4CLd \chi)$, we know that $-\eta + CLd \chi \eta^2 / r  \leq -3/4\eta$. Therefore our final bound becomes
+        \begin{align*}
+            f(y_{t+1}) \leq f(x_{t+1}) - \frac{3\eta}{4r} \sum_{i=1}^r |p_i^\top \grad f(x_{t+1})|^2 + \frac{\eta^2}{\alpha} \mg{\grad f(x_{t+1})}^2 + (\alpha+1)CL^2 \sigma^2 \chi^3 d^{3} 
+        \end{align*}
+        for some absolute constant $C$. We used that $L\eta^2 < 1$ and $0 < \delta < 1/e$. 
+    \end{proof}
+    We can copy the mirror descent lemma from last time:
+    \begin{lemma}
+        If $z_{t+1} = \Mirr_{z_t}(\alpha \tilde \grad f(x_{t+1}))$, then
+        \begin{align*}
+         \forall u \in \R^d \quad \alpha \langle \tilde \grad f(x_{t+1}), z_t-u \rangle \leq \frac{\alpha^2}{2} \mg{\tilde \grad f(x_{t+1})}^2 + V_{z_t}(u) - V_{z_{t+1}}(u).
+        \end{align*}
+    \end{lemma}
+    The standard coupling lemma comes from using $\mg{\grad f(x_{t+1})}^2 \leq 2L(f(x_{t+1}) - f(y_{t+1}))$. However this doesn't work here, as we are using an estimator. But we can fix this using the following lemma.
+    \begin{lemma}
+        On $\mathfrak B_{t+1}$, we have
+        \begin{align*}
+            \mg{\tilde \grad f(x_{t+1})}^2 \leq \frac{Cd \chi}{r \eta} [f(x_{t+1}) - f(y_{t+1}) + \eta^2 \mg{\grad f(x_{t+1})}^2 + C'L^2 \sigma^2 \chi^3 d^3]
+        \end{align*}
+    \end{lemma}
+    \begin{proof}
+        As before we have
+        \begin{align*}
+            \mg{\tilde \grad f(x_{t+1})}^2 &\leq 2\mg{\frac 1r \sum_{i=1}^r p_ip_i^\top \grad f(x_{t+1})}^2 + 2 \mg{R_{t+1}}^2 \\
+            &\leq 2 \frac{Cd}{r} \log(cTr/\delta) \cdot \frac 1r \sum_{i=1}^r |p_{t,i}^\top \grad f(x_t)|^2 + 2 \mg{R_{t+1}}^2 \\
+            &\leq \frac{Cd}{r} \log(cTr/\delta) \cdot \frac 1r \sum_{i=1}^r |p_{t,i}^\top \grad f(x_t)|^2 + C'L^2 \sigma^2 \log^{3}(rT/\delta) d^{3}
+        \end{align*}
+        From before we know that
+        \begin{align*}
+            \frac{3\eta}{4r} \sum_{i=1}^r |p_i^\top \grad f(x_{t+1})|^2 \leq f(x_{t+1}) - f(y_{t+1}) + \eta^2 \mg{\grad f(x_{t+1})}^2 + C'L^2 \sigma^2 \log^3(rT/\delta) d^3
+        \end{align*}
+        Therefore an upper bound on $\mg{\tilde \grad f(x_{t+1})}^2$ is 
+        \begin{align*}
+            \frac{Cd \chi}{r \eta} [f(x_{t+1}) - f(y_{t+1}) + \eta^2 \mg{\grad f(x_{t+1})}^2 + C'L^2 \sigma^2 \log^3(rT/\delta) d^3] + C'L^2 \sigma^2 \chi^3 d^3
+        \end{align*}
+        As $\eta < 1$ we can absorb the last term into the first by changing the constant $C'$ which gives the statement of the lemma.
+    \end{proof}
+
+    This lemma is the same as before.
+    \begin{lemma}
+        \label{lem:xttozt}
+        When $\lambda$ is chosen so $\frac{1-\lambda}{\lambda} = \frac{4d \chi\alpha}{\eta}$, the ``regret'' is bounded by
+        \begin{align*}
+            \alpha \langle \grad f(x_{t+1}), x_{t+1} - u \rangle - \alpha \langle \grad f(x_{t+1}), z_t - u \rangle \leq \frac{4d \chi \alpha^2}{\eta} (f(y_t) - f(x_{t+1}))
+        \end{align*}
+    \end{lemma}
+    \begin{proof}
+        We have by convexity and the definition of $x_{t+1} = \lambda z_t + (1-\lambda) y_t$,
+        \begin{align*}
+            &\alpha \langle \grad f(x_{t+1}), x_{t+1} - u \rangle - \alpha \langle \grad f(x_{t+1}), z_t - u \rangle \\
+            &= \alpha \langle \grad f(x_{t+1}), x_{t+1}-z_t \rangle = \frac{(1-\lambda)\alpha}{\lambda} \langle \grad f(x_{t+1}), y_t - x_{t+1} \rangle \leq \frac{(1-\lambda)\alpha}{\lambda} (f(y_t) - f(x_{t+1}))
+        \end{align*}
+        Now let $\lambda \in (0,1)$ satisfy $\frac{1-\lambda}{\lambda} = \frac{4d \chi\alpha}{\eta}$ and we are done.
+    \end{proof}
+    Now that this is done, we move onto the part of the proof which is not straightforward. The main idea from here is that, the Martingale term can be bounded by the ``Energy'' $V_{z_t}(x^*)$, which itself can be bounded by the sum of the gradient norms $\sum \mg{\grad f(x_t)}^2$ and $\Theta \geq V_{z_0}(x^*)$. 
+
+    This highlights a very general principle. To deal with martinagle error terms with high probability, try bounding them by some other part of the equation which should have typical size $\Theta(1)$. In this case, that will be $V_{z_t}(x^*)$ for us. However the route to doing this is usually not straightforward. 
+
+    This lemma reveals the martingale term we need to bound. 
+    \begin{lemma} 
+        \label{lem:martingale-term}
+        \begin{align*}
+            &\alpha\langle \grad f(x_{t+1}), z_t - u\rangle \\
+            &\leq \alpha \langle \tilde \grad f(x_{t+1}), z_t - u \rangle + \alpha \sum_{i=1}^r \langle (I- p_ip_i^\top) \grad f(x_{t+1}), z_t - u\rangle + C'T\alpha^2 \mg{R_{t+1}}^2 + \frac{1}{4T} V_{z_t}(u).
+        \end{align*}
+    \end{lemma}
+    \begin{proof}
+        \begin{align*}
+            \langle \grad f(x_{t+1}), z_t - u\rangle &= \langle \tilde \grad f(x_{t+1}), z_t - u \rangle + \sum_{i=1}^r \langle (I- p_ip_i^\top) \grad f(x_{t+1}), z_t - u\rangle + \langle R_{t+1}, z_t - u \rangle
+        \end{align*}
+        Now, by Young's inequality, $\alpha\langle R_{t+1}, z_t - u \rangle \leq C' \alpha^2 T \mg{R_{t+1}}^2 + \frac{1}{8T} \mg{z_t - u}^2$, by strong convexity of Bregman divergence, $V_{z_t}(u) \geq \frac12 \mg{z_t - u}^2$, so we arrive at the statement of the lemma.
+    \end{proof}
+
+    Notice that $\sum_{t=0}^{T-1} \sum_{i=1}^r \langle (I-p_i p_i^\top) \grad f(x_{t+1}), z_t-u \rangle$ is a martingale. This is the key idea behind why the rest of this proof works. 
+
+    \begin{definition}[Martingale Difference Sequence]
+        $\set{\xi_t}_{t\geq 1}$ is a martingale difference sequence wrt filtration $\mathcal F_t$ if $\xi_t \in \mathcal F_t$ and 
+        \begin{align*}
+            \E[\xi_t \mid \mathcal F_{t-1}] = 0
+        \end{align*}
+    \end{definition}
+    The main intuition is that in a martingale difference sequence, the variance of the full sum is the sum of the variance of each $\xi_t$, which is vastly superior than including all the cross covariance terms $\Cov(\xi_i, \xi_j)$. This improves our bound substantially. 
+    \begin{lemma}
+        Define $S_T = \sum_{t=1}^T \xi_t$. Then
+        \begin{align*}
+            \E[S_T^2] = \sum_{t=1}^T \E[\xi_t^2]
+        \end{align*}
+    \end{lemma}
+    \begin{proof}
+        We have
+        \begin{align*}
+            \E[M_T^2] = \sum \E[\xi_t^2] + 2\E[\sum_{i < j} \xi_i \xi_j]
+        \end{align*}
+        Now,
+        \begin{align*}
+            \E[\sum_{i < j} \xi_i \xi_j] = \sum_{i < j} \E[\E[\xi_i \xi_j \given \mathcal F_i]] = \sum_{i < j} \E[\xi_i \E[ \xi_j \given \mathcal F_i]] = 0.
+        \end{align*}
+    \end{proof}
+    That is the heart of why the rest of this proof should work at all.
+
+    \begin{lemma}
+        Define
+        \begin{align*}
+            \mathfrak M_{t+1} = \set{\left|\sum_{t=0}^{\tau-1} \sum_{i=1}^r \alpha \langle (I-p_ip_i^\top) \grad f(x_{t+1}, z_t-u \rangle\right| \leq \alpha \sqrt{cr \sum_{t=0}^{\tau-1} \chi^{3/2} \mg{\grad f(x_t)}^2 V_{z_t}(u)}}
+        \end{align*}
+        Then
+        \begin{align*}
+            \P(\bigcap_{t=0}^{T-1} \mathfrak M_{t}) \geq 1-\delta/3.
+        \end{align*}
+    \end{lemma}
+    \begin{proof}
+        From Lemma~\ref{lem:concentration_bounds} above, we know that 
+        \begin{align*}
+            &\left|\sum_{t=0}^{\tau-1} \sum_{i=1}^r \alpha \langle (I-p_ip_i^\top) \grad f(x_{t+1}, z_t-u \rangle \right| \\&\leq c \theta \sum_{t=0}^{\tau-1} \sum_{i=1}^r \log(crT/\delta) \mg{\grad f(x_{t+1})}^2 \mg{z_t - u}^2 + \frac{1}{\theta} \log(\frac{crT}{\delta})
+        \end{align*}
+        Using $V_{z_t}(u) \geq \frac 12\mg{z_t - u}^2$ and balancing the two terms by carefully choosing $\theta$ we arrive at the statement of the lemma.
+    \end{proof}
+
+    The rest of this proof is on bounding $V_{z_t}(x^*)$. 
+
+    \begin{lemma}[Descent]
+        On $\bigcap \mathfrak (B_t \cap \mathfrak O_t \cap \mathfrak M_t)$, for all $1 \leq \tau \leq T$, we have
+        \begin{align*}
+            &\sum_{t=0}^{\tau-1} \alpha \langle \grad f(x_t), x_t-x^* \rangle \\
+            &\leq \frac{CLd^2\chi^2}{r^2} \alpha^2(f(y_0) - f(y_\tau)) + C \alpha T^2  L^2 \sigma^2 \chi^3 d^3 + \frac{\alpha}{T} \sum_{t=0}^{\tau-1} V_{z_t}(x^*) \\
+            &+\alpha \sqrt{ \frac c r \sum_{t=0}^{\tau-1} \chi^{3/2} \mg{\grad f(x_t)}^2 V_{z_t}(x^*)} + \sum_{t=0}^{\tau-1} \frac{\alpha^2}{3L} \mg{\grad f(x_{t+1})}^2 + CT L^3 \sigma^2 \chi^5 d^5 \alpha^2 \\
+            &+ V_{z_0}(x^*) - V_{z_\tau}(x^*)
+        \end{align*}
+    \end{lemma}
+    \begin{proof}
+       By Lemma~\ref{lem:xttozt}, we know that
+        \begin{align*}
+            \sum_{t=0}^{\tau-1} \alpha \langle \grad f(x_t), x_t-x^* \rangle \leq \sum_{t=0}^{\tau-1} \frac{4d \chi\alpha^2}{\eta}(f(y_t) - f(x_{t+1})) + \sum_{t=0}^{\tau-1} \alpha \langle \grad f(x_{t+1}), z_t - u \rangle
+        \end{align*}
+        By Lemma~\ref{lem:martingale-term}, we know that
+        \begin{align*}
+            &\sum_{t=0}^{\tau-1} \alpha \langle \grad f(x_{t+1}), z_t - u \rangle 
+            \\&\leq \alpha \sum_{t=0}^{\tau-1} \left[\langle \tilde \grad f(x_{t+1}), z_t - u \rangle +\frac 1r\sum_{i=1}^r \langle (I- p_ip_i^\top) \grad f(x_{t+1}), z_t - u\rangle + 2T \mg{R_{t+1}}^2 + \frac{1}{T} V_{z_t}(u)\right]
+        \end{align*}
+        From above we know that
+        \begin{align*}
+            \alpha\sum_{t=0}^{\tau-1} \sum_{i=1}^r \langle (I- p_ip_i^\top) \grad f(x_{t+1}), z_t - u\rangle \leq \alpha \sqrt{cr \sum_{t=0}^{\tau-1} \chi^{3/2} \mg{\grad f(x_t)}^2 V_{z_t}(u)}
+        \end{align*}
+        We then know that 
+        \begin{align*}
+            &\sum_{t=0}^{\tau-1} \alpha \langle \tilde \grad f(x_{t+1}), z_t - u\rangle 
+            \\&\leq \sum_{t=0}^{\tau-1} \frac{Cd\chi\alpha^2}{r \eta}[f(x_{t+1}) - f(y_{t+1}) + \frac{\eta^2}{\alpha} \mg{\grad f(x_{t+1})}^2 + C'(\alpha+1)L^2 \sigma^2 \chi^3 d^3]
+        \end{align*}
+        Recall that $\mg{R_{t+1}}^2 \leq C'L^2\sigma^2 \chi^3 d^3$ and now choose $\eta = r/(4CLd \chi)$.  Putting all of it together, we get:
+        \begin{align*}
+            &\sum_{t=0}^{\tau-1} \alpha \langle \grad f(x_t), x_t-x^* \rangle
+            \\&\leq \frac{CLd^2\chi^2}{r^2} \alpha^2(f(y_0) - f(y_\tau)) + C' \alpha^2 T^2  L^2 \sigma^2 \chi^3 d^3 + \frac{1}{4T} \sum_{t=0}^{\tau-1} V_{z_t}(x^*) \\
+            &+\alpha \sqrt{ \frac c r \sum_{t=0}^{\tau-1} \chi^{3/2} \mg{\grad f(x_t)}^2 V_{z_t}(x^*)} + \sum_{t=0}^{\tau-1} \frac{\alpha}{3L} \mg{\grad f(x_{t+1})}^2 + C'(\alpha^3+\alpha^2) T L^3 \sigma^2 \chi^5 d^5  \\
+            &+ V_{z_0}(x^*) - V_{z_\tau}(x^*)
+        \end{align*}
+    \end{proof}
+\end{document}

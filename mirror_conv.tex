@@ -192,6 +192,7 @@ University of Oxford}
 
     The main lemma which is different from the normal mirror descent bounds is the following.
     \begin{lemma}
+        \label{lem:concentration_bounds}
     Let $\set{\mathcal F_t}$ be a filtration. Assume that $g_t, d_t \in \mathcal F_{t-1}$, and assume $p_t \sim \mathcal N(0,I)$ with $p_t \in \mathcal F_t$, $p_t \perp \mathcal F_{t-1}$. Define
     \begin{align*}
         E_\tau = \sum_{t=0}^{\tau-1} g_t^\top (I-p_tp_t^\top) d_t
@@ -323,6 +324,4 @@ is around the same size as $V_{x_0}(x^*)$. This observation is what let's us pro
         f(\bar x) - f^* \leq \frac{9\Theta}{T \alpha} = \rho c \sqrt{\frac 92} \sqrt{\frac{d\Theta}{T}} \chi^{3/4} = \widetilde{O}\left(\rho \sqrt{\frac{d \Theta}{T}}\right).
     \end{align*}
 \end{proof}
-\section{Relaxing The Quadratic Error Assumption}
-TODO
 \end{document}
