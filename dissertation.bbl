@@ -1,15 +1,34 @@
-\begin{thebibliography}{2}
+\begin{thebibliography}{5}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
+\bibitem[Jin et~al.(2019)Jin, Netrapalli, Ge, Kakade, and Jordan]{jin2019short}
+Chi Jin, Praneeth Netrapalli, Rong Ge, Sham~M. Kakade, and Michael~I. Jordan.
+\newblock A short note on concentration inequalities for random vectors with subgaussian norm.
+\newblock \emph{arXiv preprint arXiv:1902.03736}, 2019.
+\newblock URL \url{https://arxiv.org/abs/1902.03736}.
+
 \bibitem[Laurent and Massart(2000)]{laurent2000adaptive}
 B{\'e}atrice Laurent and Pascal Massart.
 \newblock Adaptive estimation of a quadratic functional by model selection.
 \newblock \emph{The Annals of Statistics}, 28\penalty0 (5):\penalty0 1302--1338, 2000.
 \newblock \doi{10.1214/aos/1015957395}.
+
+\bibitem[Ren et~al.(2023)Ren, Tang, and Li]{ren2023escaping}
+Zhaolin Ren, Yujie Tang, and Na~Li.
+\newblock Escaping saddle points in zeroth-order optimization: The power of two-point estimators.
+\newblock In \emph{Proceedings of the 40th International Conference on Machine Learning}, 2023.
+\newblock URL \url{https://arxiv.org/abs/2209.13555}.
+
+\bibitem[Sarkar et~al.(2025)Sarkar, Fellows, Duque, Letcher, Villares, Sims, Wibault, Samsonov, Cope, Liesen, Li, Seier, Wolf, Berdica, Mohl, Goldie, Courville, Sevegnani, Whiteson, and Foerster]{sarkar2025evolution}
+Bidipta Sarkar, Mattie Fellows, Juan~Agustin Duque, Alistair Letcher, Antonio~Le{\'o}n Villares, Anya Sims, Clarisse Wibault, Dmitry Samsonov, Dylan Cope, Jarek Liesen, Kang Li, Lukas Seier, Theo Wolf, Uljad Berdica, Valentin Mohl, Alexander~David Goldie, Aaron Courville, Karin Sevegnani, Shimon Whiteson, and Jakob~Nicolaus Foerster.
+\newblock Evolution strategies at the hyperscale.
+\newblock \emph{arXiv preprint arXiv:2511.16652}, 2025.
+\newblock \doi{10.48550/arXiv.2511.16652}.
+\newblock URL \url{https://arxiv.org/abs/2511.16652}.
 
 \bibitem[Vershynin(2018)]{vershynin2018high}
 Roman Vershynin.

@@ -1,7 +1,7 @@
 % !TeX root = dissertation.tex
 
-\chapter[Accelerated ZO Mirror Descent]
-{Accelerated Zeroth-Order Mirror Descent via Linear Mixing}
+\chapter[Accelerated Zero-Order Gradient Descent]
+{Accelerated Zeroth-Order Gradient Descent via Linear Mixing}
 \label{chap:linear-mixing}
 
 \begin{assumption}
@@ -312,7 +312,7 @@ First, as in the proof of Mirror Descent, we bound the regret, then $V_{z_t}(x^*
 
 \begin{lemma}[Regret Bound]
     \label{lem:regret-bound}
-    On $\bigcap \mathfrak B_t \cap \mathfrak O_t \cap \mathfrak P_t \cap \mathfrak G_t \cap \mathfrak M_t$, we have
+    On $\bigcap_{t=1}^{T} (\mathfrak B_t \cap \mathfrak O_t \cap \mathfrak P_t \cap \mathfrak G_t \cap \mathfrak M_t)$, we have
     \begin{align*}
         &\sum_{t=0}^{\tau-1} \alpha \langle \grad f(x_t), x_t-x^* \rangle
         \\&\leq \frac{8Cd \gamma \chi}{r \eta} \alpha^2(f(y_0) - f(y_\tau)) -\frac{C\alpha^2d\gamma \chi}{2r} \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2  \\
@@ -352,7 +352,7 @@ First, as in the proof of Mirror Descent, we bound the regret, then $V_{z_t}(x^*
 
 This next lemma is what we meant by bounding the martingale by other already-present $\Theta(1)$ terms. 
 \begin{lemma}[Energy Bound]
-    On $\bigcap \mathfrak B_t \cap \mathfrak O_t \cap \mathfrak P_t \cap \mathfrak G_t \cap \mathfrak M_t$, upon defining $M = \sup_{0 \leq t \leq T-1} V_{z_t}(x^*)$, choosing the slack $\gamma = 8$ and letting $\Theta \geq V_{z_0}(x^*)$ be any upper bound, we have
+    On $\bigcap_{t=1}^{T} (\mathfrak B_t \cap \mathfrak O_t \cap \mathfrak P_t \cap \mathfrak G_t \cap \mathfrak M_t)$, upon defining $M = \sup_{0 \leq t \leq T-1} V_{z_t}(x^*)$, choosing the slack $\gamma = 8$ and letting $\Theta \geq V_{z_0}(x^*)$ be any upper bound, we have
     \begin{align*}
         \frac{M}{2} \leq \frac{256Cd\chi}{r\eta}\alpha^2 (f(y_0) - f^*) + \Theta + \frac{C'(\alpha^2 T + \alpha T^2) L^2 \sigma^2 \chi^4 d^4}{r\eta}
     \end{align*}
@@ -381,18 +381,18 @@ This next lemma is what we meant by bounding the martingale by other already-pre
     which completes the proof.
 \end{proof}
 
-\begin{theorem}[Halving Function Decrease]
-    Assuming the initial error $f(y_0) - f^* \leq \Delta$, by choosing
+\begin{theorem}[Halving Function Objective]
+    Assuming the initial error $f(x_0) - f^* \leq \Delta$, and defining $\overline x = 1/T \sum_{t=0}^{T-1} x_t$, by choosing
     \begin{align*}
-        \eta = \frac{r}{4CLd \chi}, \qquad \alpha = \frac{r}{16 C d\chi} \sqrt{\frac{\Theta}{L\Delta}}
+        \eta = \frac{r}{4CLd \chi}, \qquad \alpha = \frac{r}{16 C d\chi} \sqrt{\frac{\Theta}{L\Delta}}, \qquad\sigma^2 \leq \frac{r^3 \Delta^{3/2}}{4C' L^{7/2} \chi^6 d^6 \sqrt{\Theta}}, \qquad r \geq 16\chi
     \end{align*}
     In 
     \begin{align*}
         T=\frac{256 C d \chi}{r} \sqrt{\frac{L\Theta}{\Delta}}
-    \end{align*} iterations we have $f(\bar x) - f^* \leq \Delta/2$ with probability at least $1-5\delta$.
+    \end{align*} iterations we have $f(\overline x) - f^* \leq \Delta/2$ with probability at least $1-5\delta$.
 \end{theorem}
 \begin{proof}
-    On $\bigcap \mathfrak B_t \cap \mathfrak O_t \cap \mathfrak P_t \cap \mathfrak G_t \cap \mathfrak M_t$ all our previous lemmas hold. Each has probability at least $1-\delta$ so the intersection of 5 has probability at least $1-5\delta$. 
+    On $\bigcap_{t=1}^{T} (\mathfrak B_t \cap \mathfrak O_t \cap \mathfrak P_t \cap \mathfrak G_t \cap \mathfrak M_t)$ all our previous lemmas hold. Each has probability at least $1-\delta$ so the intersection of 5 has probability at least $1-5\delta$. 
 
     By Lemma~\ref{lem:regret-bound}, we know that
     \begin{align*}
@@ -411,17 +411,17 @@ This next lemma is what we meant by bounding the martingale by other already-pre
         &\sum_{t=0}^{T-1} \alpha \langle \grad f(x_t), x_t-x^* \rangle \\
         &\leq \frac{128Cd\chi}{r\eta} \alpha^2 (f(y_0) - f^*) + \frac{C'(\alpha^2 T + \alpha T^2) L^2 \sigma^2 \chi^4 d^4}{r\eta} + 2\Theta
     \end{align*}
-    Let $\bar x = \sum_{t=0}^{T-1} x_t$. By convexity, 
+    Let $\overline x = \sum_{t=0}^{T-1} x_t$. By convexity, 
     \begin{align*}
-        T(f(\bar x)-f^*) \leq \sum_{t=0}^{T-1} (f(x_t)-f^*) \leq \sum_{t=0}^{T-1} \langle \grad f(x_t), x_t-x^* \rangle
+        T(f(\overline x)-f^*) \leq \sum_{t=0}^{T-1} (f(x_t)-f^*) \leq \sum_{t=0}^{T-1} \langle \grad f(x_t), x_t-x^* \rangle
     \end{align*}
     Therefore, assuming the initial objective gap $f(y_0) - f^* \leq \Delta$,
     \begin{align*}
-        f(\bar x) - f^* \leq \frac{128Cd\chi \alpha \Delta }{r\eta T} + \frac{2\Theta}{\alpha T} + \frac{C'(\alpha + T) L^2 \sigma^2 \chi^4 d^4}{r\eta}
+        f(\overline x) - f^* \leq \frac{128Cd\chi \alpha \Delta }{r\eta T} + \frac{2\Theta}{\alpha T} + \frac{C'(\alpha + T) L^2 \sigma^2 \chi^4 d^4}{r\eta}
     \end{align*}
     Now choose the learning rate $\eta = r/(4CLd \chi)$. Then we get
     \begin{align*}
-        f(\bar x) - f^* \leq \frac{512 C^2 d^2 L \chi^2 \alpha \Delta}{r^2 T} + \frac{2\Theta}{\alpha T} + \frac{C'(\alpha + T) L^3 \sigma^2 \chi^5 d^5}{r^2}
+        f(\overline x) - f^* \leq \frac{512 C^2 d^2 L \chi^2 \alpha \Delta}{r^2 T} + \frac{2\Theta}{\alpha T} + \frac{C'(\alpha + T) L^3 \sigma^2 \chi^5 d^5}{r^2}
     \end{align*}
     By choosing 
     \begin{align*}
@@ -441,7 +441,9 @@ This next lemma is what we meant by bounding the martingale by other already-pre
     \end{align*}
     We have
     \begin{align*}
-        f(\bar x) - f^* \leq \frac{\Delta}{4}
+        f(\overline x) - f^* \leq \frac{\Delta}{2}
     \end{align*}
     thereby halving the objective value. This completes the proof.
 \end{proof}
+
+\textbf{TODO: RESTARTS}

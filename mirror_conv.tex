@@ -60,7 +60,7 @@
 
         The first inequality follows because by convexity $f(u) \geq f(x_t) + \langle \grad f(x_t), u-x_t \rangle$.
     \end{proof}
-    Using this, we can prove Mirror descent converges.
+    Using this, we can prove Mirror Descent converges.
     \begin{lemma}
         \label{lem:classic-tele}
         For $\bar x = \frac{1}{T} \sum_{t=0}^{T-1} f(x_t)$, if we choose $\alpha = \sqrt{2\Theta / \rho^2 T}$, we have
@@ -101,7 +101,7 @@
         \end{align*}
         where $p \sim \mathcal N(0,I_d)$. 
     \end{definition}
-    For simplicity of exposition we will  initially assume there is no quadratic error and $\tilde \grad f(x_t) = p_tp_t^\top \grad f(x_t)$. Thus the above equals,
+    For simplicity of exposition in this chapter only we will assume there is no quadratic error and $\tilde \grad f(x_t) = p_tp_t^\top \grad f(x_t)$. Thus the above equals,
     \begin{align}
         &\alpha \langle \grad \tilde f(x_t), x_t-u \rangle + \alpha \langle (I-p_tp_t^\top) \grad f(x_t), x_t-u \rangle \notag \\
         &\leq \frac{\alpha^2}{2} \mg{\tilde \grad f(x_t)}^2 + V_{x_t}(u) - V_{x_{t+1}}(u) + \alpha \langle (I-p_tp_t^\top) \grad f(x_t), x_t-u \rangle \label{eq:telescope}
@@ -111,7 +111,7 @@
         \label{lem:est-bound}
         With probability at least $1-\delta$, we have for every $1 \leq t \leq T$,
         \begin{align*}
-            |p_tp_t^\top \grad f(x_t)| \leq c \sqrt{d} \log(cT/\delta)^{3/2} \mg{\grad f(x_t)}
+            |p_tp_t^\top \grad f(x_t)| \leq c \sqrt{d} \log(cT/\delta) \mg{\grad f(x_t)}
         \end{align*}
     \end{lemma}
     \begin{proof}
