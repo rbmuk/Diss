@@ -1,73 +1,9 @@
-\documentclass[twoside,11pt]{article}
+% !TeX root = dissertation.tex
 
-\usepackage[preprint]{jmlr2e}
+\chapter[Nonconvex ZO Optimization with EGGROLL]
+{Nonconvex Zeroth-Order Optimization with EGGROLL}
+\label{chap:fosp-eggroll}
 
-\usepackage{enumitem}
-\usepackage{graphicx,color}
-\usepackage{hyperref}
-\usepackage{url}
-\usepackage{booktabs}
-\usepackage{amsfonts}
-\usepackage{nicefrac}
-\usepackage{microtype}
-\usepackage{bbm}
-
-\usepackage{amsmath, amsfonts, amssymb}
-\newtheorem{assumption}{Assumption}
-\usepackage{mathtools}
-\usepackage{graphicx}
-\usepackage{bm}
-
-\usepackage{physics}
-
-\usepackage{algorithm}
-\usepackage{algpseudocode}
-
-% Common shortcuts
-\def\mbb#1{\mathbb{#1}}
-\def\mfk#1{\mathfrak{#1}}
-
-\def\bN{\mbb{N}}
-\def \C{\mbb{C}}
-\def \R{\mbb{R}}
-\def\bQ{\mbb{Q}}
-\def\bZ{\mbb{Z}}
-\def \cph{\varphi}
-\renewcommand{\th}{\theta}
-\def \ve{\varepsilon}
-\newcommand{\mg}[1]{\| #1 \|}
-
-% Often helpful macros
-\newcommand{\floor}[1]{\left\lfloor#1\right\rfloor}
-\newcommand{\ceil}[1]{\left\lceil#1\right\rceil}
-\renewcommand{\P}{\mathbb P\qty}
-\newcommand{\E}{\mathbb{E}\qty}
-\newcommand{\Et}{\mathbb{E}_{\mathcal F_{t-1}} \qty}
-\newcommand{\Pt}{\mathbb{P}_{\mathcal F_{t-1}} \qty}
-\newcommand{\Cov}{\mathrm{Cov}\qty}
-\newcommand{\Var}{\mathrm{Var}\qty}
-
-\newcommand{\lr}{\mathrm{lr}}
-\renewcommand{\grad}{\nabla} 
-\newcommand{\1}{\mathbbm{1}}
-
-% Sets
-\usepackage{braket}
-
-\graphicspath{{/}}
-\usepackage{float}
-
-\renewcommand{\set}[1]{\left\{#1\right\}}
-\newcommand{\given}{\;\middle|\;}
-
-\title{EGGROLL Convergence}
-\date{\today}
-\author{\name Rohan Mukherjee \email rohan.mukherjee@st-hildas.ox.ac.uk \\
-\addr Department of Computer Science \\
-University of Oxford}
-
-\begin{document}
-    \maketitle
     \section{Problem Setup}
     \citet{sarkar2025evolution} introduce EGGROLL as a low-rank evolutionary strategies method for scalable black-box optimization of large neural networks, with major applications being LLM fine tuning and post-training. In this excerpt, we prove that (symmetric) EGGROLL converges to a first order stationary point. 
 
@@ -836,5 +772,3 @@ University of Oxford}
             &\leq \frac{(T+2)\delta}{T} + \delta + \delta + \frac{K\delta}{T} \leq 5\delta.
         \end{align*}
     \end{proof}
-    \bibliography{references}
-\end{document}
