@@ -1,0 +1,300 @@
+\chapter{Preliminaries}
+\label{chap:preliminaries}
+
+In this chapter we provide some background in optimization, list the standard assupmtions and definitions, and introduce the relevant probabilistic tools that will become central to our analysis in the sequel.
+
+\section{Optimization}
+The perfect optimization algorithm would take a function $f: \R^d \to \R$ and output a point $x^* \in \R^d$ satisfying
+\begin{align*}
+    x^* \in \mathrm{argmin}_{x \in \R^d} f(x)
+\end{align*}
+However, since deciding whether a quartic polynomial $p(x_1, \ldots, x_d) \in \R[x_1, \ldots, x_d]$ is globally non-negative,
+\begin{align*}
+    &p(x) \geq 0 \qquad \text{for all } x \in \R^d
+\end{align*}
+is NP-hard~\cite{ahmadi2013nphardness}, it is proven in~\cite{anandkumar2016efficient} that even verifying whether a given point is a local minimum of a non-convex function is NP-hard in the worst case. So, the best we can hope for must be more restrictive. For general non-convex functions, the right definition ends up being
+\begin{definition}
+    A point $x \in \R^d$ is an $\ve$-first order stationary point if 
+    \begin{align*}
+        \mg{\grad f(x)} \leq \ve
+    \end{align*}
+\end{definition}
+On the other hand, for convex $f$, we usually measure accuracy in terms of the function gap.
+\begin{definition}
+    Let $x^* \in \mathrm{argmin}_{x \in \R^d} f(x)$. A point $x \in \R^d$ is $\ve$-optimal if
+    \begin{align*}
+        f(x) - f(x^*) \leq \ve
+    \end{align*}
+\end{definition}
+To reach a first-order stationary point, we need an idea of how much signal we get from the gradient versus noise. Recall that for any differentiable function $f(x)$,
+\begin{align*}
+    f(x+h) = f(x) + \langle \grad f(x), h \rangle + O(\mg{h}^2)
+\end{align*}
+The noise $O(\mg{h}^2)$ term is quantified by the $L$-smooth assumption
+\begin{definition}
+    A function $f \in \mathcal C^1(\R^d)$ is $L$-smooth if
+    \begin{align*}
+        \mg{\grad f(x) - \grad f(y)} \leq L \mg{x-y}
+    \end{align*}
+\end{definition}
+Which leads to the descent lemma, the starting point to the analysis of any gradient-based algorithm.
+\begin{lemma}[Descent Lemma]
+    \label{lem:descent-lemma}
+    If $f \in \mathcal C^1(\R^d)$ is $L$-smooth, then for any $h \in \R^d$,
+    \begin{align*}
+        f(x+h) \leq f(x) + \langle \grad f(x), h \rangle + \frac{L}{2}\mg{h}^2
+    \end{align*}
+\end{lemma}
+\begin{proof}
+    Writing $g(t) = f(x+th)$, we know that $\dv{t} g(t) = \langle \grad f(x+th), h \rangle$, and therefore
+    \begin{align*}
+        g(1) - g(0) = \int_0^1 \dv{t} g(t)\dd t = \int_{0}^1 \langle \grad f(x+th), h \rangle \dd t
+    \end{align*}
+    Therefore,
+    \begin{align*}
+        f(x+h) - f(x) - \langle \grad f(x),h\rangle = \int_{0}^1 \langle \grad f(x+th) - \grad f(x), h \rangle \dd t
+    \end{align*}
+    By the Cauchy-Schwarz inequality and the $L$-smooth assumption,
+    \begin{align*}
+        |\langle \grad f(x+th) - \grad f(x), h \rangle| &\leq \mg{\grad f(x+th) - \grad f(x)} \mg{h} \\
+        &\leq tL\mg{h}^2
+    \end{align*}
+    Therefore,
+    \begin{align*}
+        |f(x+h) - f(x) - \langle \grad f(x),h\rangle| \leq L \mg{h}^2 \int_{0}^1 t \dd t = \frac{L}{2} \mg{h}^2
+    \end{align*}
+\end{proof}
+The main optimization algorithm used in ML is gradient descent.
+\begin{algorithm}[H]
+\caption{Gradient Descent}
+\label{alg:gradient-descent}
+\begin{algorithmic}[1]
+    \Require Objective function $f:\R^d\to\R$, smoothness constant $L>0$,
+    initial point $x_0\in\R^d$, number of iterations $T$
+    \For{$t=0,\ldots,T-1$}
+        \State $x_{t+1} \gets x_t-\dfrac{1}{L}\grad f(x_t)$
+    \EndFor
+    \State \Return $x_T$
+\end{algorithmic}
+\end{algorithm}
+By using the $L$-smoothness assumption, gradient descent converges to a first-order stationary point in $O(L (f(x) - f^*)/\ve^2)$ iterations where $f^* = f(x^*) = \mathrm{argmin}_{x \in \R^d} f(x)$. For convex functions, it demonstrates a linear convergence to an $\ve$-optimal point in $O(L\mg{x-x^*}^2/\ve)$ iterations. Gradient descent is the starting point for all algorithms discussed in the sequel.
+
+\section{Zero-Order Oracles}
+The focus of this work will be on zero-order optimization algorithms. Simply put, we drop the assumption that we can access gradients $\grad f(x)$. We can only evaluate the function (``oracle'') at points of our choosing $x \in \R^d, \; f(x)$. The simplest thing to do now is to calculate
+\begin{align*}
+    \widetilde \grad f(x) = \sum_{i=1}^d \frac{f(x+\sigma e_i) - f(x-\sigma e_i)}{2 \sigma} e_i 
+\end{align*}
+for any orthonormal basis $\set{e_1, \ldots, e_d}$ of $\R^d$. We have
+\begin{align*}
+    \mg{\widetilde{\grad} f(x) - \grad f(x)} \leq \frac{L\sigma \sqrt{d}}{2}
+\end{align*}
+This is a simple approach applied successfully, but is often of little practical use: frontier LLMs have $d$ in the trillions, and trillions of forward passes to calculate just one gradient is far worse than the usual backpropogation. 
+
+For a quadratic $f(x) = \frac 12 x^\top H x$ with symmetric $H$, 
+\begin{align*}
+    \grad f(x) = Hx = \begin{bmatrix}
+        \frac{f(x+e_1) - f(x-e_1)}{2} & \cdots &  \frac{f(x+e_d) - f (x-e_d)}{2}
+    \end{bmatrix}^\top
+\end{align*}
+Thus typically the gradient gives $d$ times more information than any single forward pass $f(x+e_i)$. This suggests that any zero-order optimization algorithm for convergence to a first-order stationary point for general nonconvex $f$ should take $d$ times more queries in the worst case. To the best of our knowledge this lower bound is currently open. Nevertheless, we are unaware of any method in the literature achieving a sublinear $d$ dependence for this problem.
+
+Another way to use the oracle $f$ is to query random perturbations. For a random direction $p \sim \mathcal N(0,I_d)$, and search radius $\sigma$, we can look at $f(x+\sigma p)$. For $p_1, \ldots, p_r \overset{\mathrm{i.i.d.}}{\sim} \mathcal N(0,I_d)$ where $r$ is the population size, a Taylor expansion suggests the following estimator
+\begin{align}
+    \label{eq:estimator}
+    \widetilde{\grad} f(x) = \frac 1r \sum_{i=1}^r \frac{f(x+\sigma p_i) - f(x-\sigma p_i)}{2\sigma} p_i.
+\end{align}
+In the sequel, this is the only estimator for the gradient we use. Upon defining the gaussian density 
+\begin{align*}
+    \cph_\sigma(z) = \frac{1}{(2\pi \sigma^2)^{d/2}} \exp(-\frac{\mg{z}^2}{2})
+\end{align*}
+and the Gaussian smoothed objective
+\begin{align*}
+    f_\sigma(x) = (f * \cph_\sigma)(x) = \int_{\R^d} f(x+z)\cph_\sigma(z) \dd z = \mbb E_{p \sim \mathcal N(0,I_d)}[f(x+\sigma p)]
+\end{align*}
+under standard integrability assumptions
+\begin{align*}
+    \grad f_\sigma(x) = \frac{1}{\sigma} \E[f(x+\sigma p)p]
+\end{align*}
+which by symmetry of the Gaussian distribution yields,
+\begin{align*}
+    \grad f_\sigma(x) = \mbb E[\widetilde \grad f(x)]
+\end{align*}
+The advantage behind the central-difference version $\widetilde \grad f(x)$ and $\frac{1}{\sigma} f(x+\sigma p)p$ is that the first has good cancellation properties under a Taylor expansion
+\begin{align*}
+    f(x+\sigma p) - f(x-\sigma p) = 2\sigma \langle \grad f(x), p \rangle + O(\mg{\sigma p}^3).
+\end{align*}
+Since $\E[\widetilde{\grad} f(x)] = \grad f_\sigma(x)$, the bias of the estimator is precisely the error introduced by Gaussian smoothing. The high-dimensional analysis of this bias was investigated in~\cite{sarkar2025evolution}, where they proved 
+\begin{align*}
+    |\E[\widetilde{\grad} f(x)] - \grad f(x)| = O_d(L \sigma \sqrt{d})
+\end{align*}
+Thus choosing $\sigma = o(d^{-1/2})$ ensures this bias vanishes at infinity. The intuition is that $f$ linearizes in high dimensions.
+\section{The Low-Rank Trick}
+In an ML model $\Phi_\theta(x)$, the parameters $\theta \in \R^{d \times m}$ are naturally thought of not as vectors but as matrices. While helpful that the estimator~\ref{eq:estimator} lets us evaluate at only $r$ perturbations per iteration rather than the full $d \times m$, since $p \in \R^{d \times m}$ has all Gaussian entries, every entry is non-zero almost surely. Thus evaluating $\Phi_{\theta + p}(x)$ is still slow as we need to first add the two matrices $\theta + p$ before evaluating, with memory $O(rd)$ just to store the perturbations.
+
+The low rank trick, introduced in~\cite{sarkar2025evolution}, is to sample $a \sim \mathcal N(0,I_d)$, $b \sim \mathcal N(0, I_m)$, and exploit $(\theta + ab^\top)x = \theta x + a(b^\top x)$. This reduces the memory to $O(r(d+m))$, which makes zero-order algorithms practical.
+
+However, for independent gaussian $Z,W \sim \mathcal N(0,1)$, the product $ZW$ is no longer subgaussian, it is sub-exponential, meaning it has fat tails. This could, \textit{a priori}, ruin the convergence of the algorithm, as $\E[\|\widetilde \grad f(x)\|^2]$ could grow too large. This is the central question of Chapter~\ref{chap:fosp-eggroll}. To heed our analysis, for $A,B \in \R^{d \times m}$, we define the Frobenius inner product and the Frobenius norm,
+\begin{align*}
+    \langle A, B \rangle_F = \Tr(AB^\top) = \sum_{i,j} A_{i,j} B_{i,j}, \quad \mg{A}_F = \sqrt{\sum_{i,j} A_{i,j}^2}
+\end{align*}
+We define $L$-smoothness in the same way as before using this norm. 
+
+The Gaussian distribution is rotationally invariant, meaning for $p \sim \mathcal N(0,I)$, for any rotation matrix $R$ satisfying $RR^\top = R^\top R = I$, we have $Rp \sim \mathcal N(0,I)$. Thus, we search all directions uniformly. However, $ab^\top$ does not have this property, as it is rank 1, we could design a rotation matrix which rotates it into $M$ which is full rank. This raises the question, is rotational invariance necessary? What if we miss the direction of the gradient?
+\begin{definition}
+    The random variable $X \in \R^d$ is isotropic if
+    \begin{align*}
+        \E[XX^\top] = I
+    \end{align*}
+    this is equivalent to saying, for any $u \in \R^d$,
+    \begin{align*}
+        \E[\langle X, u \rangle^2] = \E[u^\top XX^\top u] = u^\top \E[XX^\top]u = \mg{u}^2
+    \end{align*}
+\end{definition}
+While $ab^\top$ is not rotationally invariant, it is isotropic:
+\begin{lemma}
+    For $a \sim \mathcal N(0,I_d), b \sim \mathcal N(0, I_m)$ independent, for any $U \in \R^{d \times m}$,
+    \begin{align*}
+        \E[\langle ab^\top, U \rangle_F^2] = \mg{U}_F^2
+    \end{align*}
+\end{lemma}
+\begin{proof}
+    We have
+    \begin{align*}
+        \E[\langle ab^\top, U \rangle_F^2] = \E[\Tr(U b a^\top)^2]
+    \end{align*}
+    By cyclic property of trace, we know that $\Tr(ABC)=\Tr(CAB)$, so the above equals
+    \begin{align*}
+        \E[(a^\top U b)^2] = \E[b^\top U^\top a a^\top U b]
+    \end{align*}
+    By conditioning on $b$, using that $a$ and $b$ are independent, and that $a \sim \mathcal N(0,I)$,
+    \begin{align*}
+        \E[b^\top \E[U^\top a a^\top U \mid b] b] = \E[b^\top U^\top \E[aa^\top] U b] = \E[b^\top U^\top U b]
+    \end{align*}
+    This equals
+    \begin{align*}
+        \E[\Tr(U^\top U bb^\top)] = \Tr(U^\top U \E[bb^\top]) = \Tr(U^\top U) = \mg{U}_F^2.
+    \end{align*}
+\end{proof}
+It will turn out that isotropy is exactly the condition we need for convergence to a first-order stationary point. 
+
+\section{Probability Tools}
+Here we give a short background on measure-theoretic probability. We define a $\sigma$-algebra
+\begin{definition}
+    For a state space $\Omega$, $\mathcal F \subset 2^X$ is a $\sigma$-algebra if:
+    \begin{enumerate}[nosep]
+        \item $\Omega \in \mathcal F$
+        \item $\mathcal F$ is closed under complements: if $A \in \mathcal F$, then $A^c \in \mathcal F$
+        \item $\mathcal F$ is closed under countable unions: if $A_1, A_2, \ldots, \in \mathcal F$, then $A = A_1 \cup A_2 \cup \cdots \in \mathcal F$. 
+    \end{enumerate}
+\end{definition}
+By combining the last two properties $\mathcal F$ is also closed under countable intersections. $\mathcal F$ is the collection of \textit{measurable sets}, or in probability, \textit{events}. 
+\begin{definition}
+    $\mbb P: \mathcal F \to [0,1]$ is a probability measure if $\P(\emptyset) = 0$, $\P(\Omega) = 1$, and
+    \begin{align*}
+        \P(\bigcup_{i=0}^{\infty} E_i) = \sum_{i=0}^{\infty} E_i
+    \end{align*}
+\end{definition}
+The collection $(\Omega, \mathcal F, \mbb P)$ is called a probability space. 
+
+In stochastic optimization, we often want to talk about the information available at iteration $t$. Filtrations give us a natural way to do this. 
+\begin{definition}
+    $\set{\mathcal F_t}_{t=0}^\infty$ is a filtration on $(\Omega, \mathcal F, \mbb P)$ if each $\mathcal F_t \subset \mathcal F$ is $\sigma$-algebra, and
+    \begin{align*}
+        \mathcal F_0 \subset \mathcal F_1 \subset \mathcal F_2 \subset \cdots
+    \end{align*}
+\end{definition}
+For Chapters~\ref{chap:zo-mirror-descent} and~\ref{chap:linear-mixing}, at each iteration $t$ we sample $p_{t,1}, \ldots, p_{t,r} \sim \mathcal N(0,I_d)$ to evaluate $\widetilde \grad f(x_t)$. Thus we define the following filtration
+\begin{definition}
+    The zero-order filtration $\set{\mathcal F_t}_{t=0}^\infty$ is defined as
+    \begin{align*}
+        \mathcal F_t
+    =
+    \sigma\left(
+        x_0,\ldots,x_t,
+        \{p_{\tau,i}:0\leq \tau\leq t-1,\ 1\leq i\leq r\}
+    \right).
+    \end{align*}
+    which encapsulates all information available at time $t$. 
+\end{definition}
+Central to our analysis are concentration inequalities. Recall Hoeffding's inequality:
+\begin{lemma}[Hoeffding's inequality]
+    Let $X_1,\ldots,X_n$ be independent random variables satisfying
+    $a_i \leq X_i \leq b_i$ almost surely for every $1\leq i\leq n$.
+    Then, for every $t>0$,
+    \[
+        \Pr\left(
+            \left|
+                \sum_{i=1}^n \big(X_i - \E[X_i]\big)
+            \right|
+            \geq t
+        \right)
+        \leq
+        2\exp\left(
+            -\frac{2t^2}
+            {\sum_{i=1}^n (b_i-a_i)^2}
+        \right).
+    \]
+\end{lemma}
+By re-arranging, we can get
+\begin{lemma}
+    Let $X_1,\ldots,X_n$ be independent random variables satisfying
+    $a_i \leq X_i \leq b_i$ almost surely for every $1\leq i\leq n$. Then with probability at least $1-\delta$, we have
+    \begin{align*}
+        \left|\sum_{i=1}^n \big(X_i - \E[X_i]\big)\right| \leq \sqrt{\frac 12\sum_{i=1}^n (b_i-a_i)^2 \log(2/\delta)}
+    \end{align*}
+\end{lemma}
+Using $a_i \leq X_i \leq b_i$, $\Var(X_i) = \E[(X_i-\E(X_i))^2] \leq (b_i-a_i)^2$. A bernoulli random variable which is $a_i$ and $b_i$ with probability 1/2 has variance $(b_i-a_i)^2/4$, so this is tight up to constant factors. Since $X_i$ are independent, $\Var(X_1 + \cdots + X_n) = \Var(X_1) + \cdots + \Var(X_n) = \sum_{i=1}^n (b_i-a_i)^2$. Hoeffding's inequality says that, when the $a_i \leq X_i \leq b_i$, the absolute value of the centered sum is not typically that much larger than its expectation. 
+
+However, this property is not limited to just $a_i \leq X_i \leq b_i$. It carries over to martingale difference sequences. 
+\begin{definition}[Martingale Difference Sequence]
+    $\set{\xi_t}_{t\geq 1}$ is a martingale difference sequence wrt filtration $\mathcal F_t$ if $\xi_t \in \mathcal F_t$ and 
+    \begin{align*}
+        \E[\xi_t \mid \mathcal F_{t-1}] = 0
+    \end{align*}
+\end{definition}
+The main intuition is that in a martingale difference sequence, the variance of the full sum is the sum of the variance of each $\xi_t$, which is vastly superior than including all the cross covariance terms $\Cov(\xi_i, \xi_j)$. This improves our bound substantially. 
+\begin{lemma}
+    Define $S_T = \sum_{t=1}^T \xi_t$. Then
+    \begin{align*}
+        \E[S_T^2] = \sum_{t=1}^T \E[\xi_t^2]
+    \end{align*}
+\end{lemma}
+\begin{proof}
+    We have
+    \begin{align*}
+        \E[M_T^2] = \sum \E[\xi_t^2] + 2\E[\sum_{i < j} \xi_i \xi_j]
+    \end{align*}
+    Now,
+    \begin{align*}
+        \E[\sum_{i < j} \xi_i \xi_j] = \sum_{i < j} \E[\E[\xi_i \xi_j \given \mathcal F_i]] = \sum_{i < j} \E[\xi_i \E[ \xi_j \given \mathcal F_i]] = 0.
+    \end{align*}
+\end{proof}
+
+For us, these martingale terms $\xi_i$ will always be subgaussian.
+\begin{definition}
+    The random variable $X \in \R$ is $\sigma$-subgaussian if
+    \begin{align*}
+        \E[\exp(\frac{X^2}{3\sigma^2})] \leq 2
+    \end{align*}
+\end{definition}
+Under this definition $\mathcal N(0,1)$ is 1-subgaussian (the constant 3 is not standard). We have the following lemma which vastly generalizes Hoeffding's inequality and will help us substantially in the sequel,
+\begin{lemma}[Adapted Sub-Gaussian Hoeffding's inequality]
+    Let $\{\mathcal F_t\}_{t=0}^T$ be a filtration, and let $X_t$ be
+    $\mathcal F_t$-measurable. Suppose that, conditional on
+    $\mathcal F_{t-1}$, $X_t$ is $\sigma_t$-subgaussian and mean zero.
+    Then, for any $\delta\in(0,1)$, with probability at least $1-\delta$,
+    \[
+        \left|\sum_{t=1}^T X_t\right|
+        \leq
+        c\sqrt{
+            \log\left(\frac{2}{\delta}\right)
+            \sum_{t=1}^T \sigma_t^2
+        },
+    \]
+    where $c>0$ is an absolute constant.
+\end{lemma}
+
+Convergence of stochastic gradient methods are standard in the literature, see for example~\cite{ghadimi2013stochastic,nesterov2017random,balasubramanian2018zeroth}. Concentration inequalities will allow us to upgrade that convergence in expectation to convergence guarantees that hold with high probability.
+
+\section{Notation}
+$d$ and $m$ will always be dimension constants, $r$ will always be the population size, $T$ will always be the iteration horizon, $L$ will always be the smoothness constant, $\sigma$ will always be the smoothing radius, $\ve$ will always be the desired accuracy, and $\delta$ will always be the failure probability. We use $O(\cdot), \Omega(\cdot)$, and $\Theta(\cdot)$ in the standard sense. The notation $\widetilde O(\cdot)$ hides polylogarithmic factors in the problem parameters, including $d$, $L$, $T$, $f(x_0)-f^*$, $\ve$ and failure probability $\delta$. Throughout the sequel, $\chi$ always denotes a polylogarithmic factor. 

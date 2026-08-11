@@ -1,20 +1,86 @@
 % !TeX root = dissertation.tex
 
-\chapter[Accelerated Zero-Order Gradient Descent]
+\chapter[Accelerated Zeroth-Order Gradient Descent]
 {Accelerated Zeroth-Order Gradient Descent via Linear Mixing}
 \label{chap:linear-mixing}
+Accelerated gradient descent for $L$-smooth convex functions was developed in~\cite{nesterov1983method}, improving the iteration complexity of finding an $\ve$-optimal point from $O(1/\ve)$ with gradient descent to $O(1/\sqrt{\ve})$. The algorithm can be defined inductively as 
+\begin{align*}
+    x_k &= y_{k-1} - s \grad f(y_{k-1}) \\
+    y_k &= x_k + \frac{k-1}{k+2}(x_k - x_{k-1})
+\end{align*}
+The point $y_k$ ``looks ahead'' in the direction of velocity $x_k - x_{k-1}$ with coefficient $(k-1)/(k+2) \approx 1 - 3/k$, then $x_{k+1}$ subsequently does a gradient step at that point. This is slightly different from the momentum method
+\begin{align*}
+    x_{k+1} &= y_k - s \grad f(x_k) \\
+    y_k &= x_k + \beta (x_k - x_{k-1})
+\end{align*}
+which exhibits acceleration for strongly convex quadratics, but may not even converge for general convex $f$. It a mystery why the precise coefficient $(k-1)/(k+2)$ was chosen by Nesterov, except as an algebraic trick to make an energy telescope. Recently, by taking a limit as the step size $s \to 0$,~\cite{su2016differential} find that Nesterov's AGD yields the second-order scheme
+\begin{align*}
+    \ddot{X_t} + \frac{3}{t} \dot{X_t} + \grad f(X_t) = 0
+\end{align*}
+This is unusual not least because Nesterov's AGD is a first-order method, only relying on gradients. Perhaps surprisingly, their analysis found that $3=2+1$ the smallest constant which preserves acceleration. Unfortuantely, these Lyapunov proofs prove difficult to analyze with high probability, as martingale fluctuations yield an additive term, so the energy could grow linearly rather than decreasing. 
 
+To our rescue is the linear mixing framework discovered by~\cite{allenZhu2016linear}. By ``mixing'' mirror and gradient descent,
+\begin{align*}
+    x_{k+1} &= \lambda z_k + (1-\lambda) y_k\\
+    y_{k} &= x_k - \frac{1}{L} \grad f(x_k) \\
+    z_k &= \Mirr_{z_{k-1}}(\alpha \grad f(x_k))
+\end{align*}
+after carefully tuning $\alpha$ and $\lambda$, ~\cite{allenZhu2016linear} show this scheme can also achieve acceleration. The point $x_{k+1}$ is a linear combination of $y_k$ and $z_k$, $y_k$ does a gradient step at $x_k$, and $z_k$ does a mirror step with $\grad f(x_k)$. The idea is that, while mirror and gradient descent tell us to go to different places, we can use part of both answer to achieve a faster scheme than regular gradient descent. Most importantly for us, they do not rely on carefully engineered Lyapunov functions, and the analysis is relatively direct. This is what will allow us to design a zero-order accelerated gradient descent scheme. 
+
+\section{The Main Result}
 \begin{assumption}
     We assume that the smoothness constant of $f$ is $L \geq 1$. Otherwise, we can replace it with 1. Also assume that $0 < \delta < 1/e$.
 \end{assumption}
 
-We use the linear mixing framework to design an accelerated zero-order gradient descent algorithm. The idea is to query gradient descent $y_t$ and mirror descent $z_t$ at the same point $x_t$, and then linearly mix the answers $x_{t+1} = \lambda z_t + (1-\lambda) y_t$. The algorithm can be described as
-\begin{align*}
-    x_{t+1} &= \lambda y_t + (1-\lambda) z_t \\
-    y_{t+1} &= x_{t+1} - \eta \tilde \grad f(x_{t+1}) \\
-    z_{t+1} &= \Mirr_{z_t}(\alpha \tilde \grad f(x_{t+1}))
-\end{align*}
-The first thing to do is to deal with quadratic error. 
+We use the linear mixing framework of~\cite{allenZhu2016linear} to design an accelerated zero-order gradient method. At each iteration, the gradient sequence $(y_t)$ and the mirror sequence $(z_t)$ are mixed to form a common query point. The same zeroth-order estimate at this point is then used for both updates. The full procedure is given in Algorithm~\ref{alg:zo-linear-mixing}.
+
+\begin{definition}[Rank-\(r\) Symmetric Zeroth-Order Estimator]
+    For $x\in\R^d$ and independent directions $p_1,\ldots,p_r\sim\mathcal N(0,I_d)$, define
+    \begin{align*}
+        \widetilde{\grad} f(x)
+        \coloneqq \frac1r\sum_{i=1}^r
+        \frac{f(x+\sigma p_i)-f(x-\sigma p_i)}{2\sigma}\,p_i.
+    \end{align*}
+    with each iteration using $2r$ function evaluations.
+\end{definition}
+
+\begin{algorithm}[H]
+    \caption{Rank-\(r\) Zeroth-Order Linear Mixing}
+    \label{alg:zo-linear-mixing}
+    \begin{algorithmic}
+        \Require Zeroth-order oracle $f$ and initial states $x_0,y_0,z_0\in\R^d$
+        \Require Horizon $T$, rank $r$, stepsizes $\eta,\alpha>0$, smoothing radius $\sigma>0$, and mixing weight $\lambda\in(0,1)$
+        \For{$t=0,\ldots,T-1$}
+            \State Set $x_{t+1}\gets \lambda z_t+(1-\lambda)y_t$
+            \State Sample $p_{t+1,1},\ldots,p_{t+1,r}\overset{\mathrm{i.i.d.}}{\sim}\mathcal N(0,I_d)$ to compute $\widetilde{\grad} f(x_{t+1})$
+            \State Update $y_{t+1}\gets x_{t+1}-\eta \widetilde{\grad} f(x_{t+1})$
+            \State Update $z_{t+1}\gets\Mirr_{z_t}(\alpha \widetilde{\grad} f(x_{t+1})$
+        \EndFor
+        \State \Return $\displaystyle \overline x_T\gets\frac1T\sum_{t=1}^T x_t$
+    \end{algorithmic}
+\end{algorithm}
+The main result of this chapter is the following (informal) theorem.
+\begin{theorem}[informal]
+    For a given initial point $x_0$ satisfying $f(x_0) - f^* \leq \Delta$ and letting $\Theta \geq V_{x_0}(x^*)$ be any upper bound, by choosing
+    \begin{align*}
+        \eta = \widetilde{O}\left(\frac{r}{dL} \right),& \quad \alpha = \widetilde{O}\left(\frac{r}{d} \sqrt{\frac{\Theta}{L \Delta}} \right), \quad \sigma^2 \leq \widetilde{O}\left(\frac{r^3 \Delta^{3/2}}{L^{7/2} d^6 \sqrt{\Theta}}\right), 
+        \\&\frac{1-\lambda}{\lambda} = \widetilde{O}\left(\frac{d^2 L \Theta}{\Delta}\right), \quad r = \widetilde{O}(1)
+    \end{align*}
+    Algorithm~\ref{alg:zo-linear-mixing} outputs a point $\overline x$ satisfying $f(\overline x) - f^* \leq \Delta/2$ in
+    \begin{align*}
+        T = \widetilde{O}\left(\frac{d}{r} \sqrt{\frac{L\Theta}{\Delta}}\right)
+    \end{align*}
+    iterations. 
+
+    Furthermore, by restarting Algorithm~\ref{alg:zo-linear-mixing} $\log_2(\Delta/\ve)$ times, we receive a point $\overline x$ satisfying $f(\overline x) - f^* \leq \ve$ in
+    \begin{align*}
+        T =\widetilde{O}\left(\frac{d}{r} \sqrt{\frac{L\Theta}{\ve}}\right)
+    \end{align*}
+    iterations. 
+\end{theorem}
+
+\section{Quadratic Error}
+The first thing to do is to control the quadratic error in this estimator.
 \begin{lemma}[Quadratic Error]
     \begin{align*}
         \mg{\tilde \grad f(x) - \frac 1r \sum_{i=1}^r p_ip_i^\top \grad f(x)} \leq L \sigma \frac 1r \sum_{i=1}^r \mg{p_i}^3
@@ -42,19 +108,6 @@ The first thing to do is to deal with quadratic error.
 Unfortunately, this bound is necessary. Ideally we would like to just say that $f(x+\sigma p) - f(x-\sigma p) / 2 \sigma p = pp^\top \grad g(x)$ for some function $g(x)$ related to $f(x)$. Possibly a smoothed variant $f_\sigma$. But this cannot possible hold for every $p$ unless $f$ is quadratic in a neighborhood of $x$. To see this, we can use MVT to expand the LHS as $\langle \grad f(x+\theta \sigma p), p \rangle p$. By taking $p = e_i$, we see that $e_i^\top \grad g(x) = e_i^\top \grad f(x+\theta_i \sigma e_i)$. Sending $\sigma \to 0$, $\grad f(x+\theta_i \sigma e_i) \to \grad f(x)$ under $L$-smoothness assumption, meaning that $\grad g(x) = \grad f(x)$. This would say that $f$ is quadratic, which is not true in general.
 
 \section{Gradient Progress}
-
-Recall the following lemma from before.
-\begin{lemma}
-    Let $X$ follow $\chi^2_d$ distribution and $0 < \delta < 1/e$. Then there exists $L_{\delta}$ such that for every $d$, with
-    \begin{align*}
-        A \coloneqq \set{dL_{\delta}^2 \leq X \leq 3d\log(C/\delta)}
-    \end{align*}
-    we have
-    \begin{align*}
-        \E[(X-d) ; A] = 0, \quad \P(A) \geq 1-\delta
-    \end{align*}
-    for some absolute constant $C$.
-\end{lemma}
 These lemmas tell us how much progress the gradient descent step is making.
 \begin{lemma}[\citet{vershynin2018high} Corollary 7.3.2]
     Let $P \in \R^{d \times r}$ be a matrix with i.i.d. Gaussian entries. Define $\mg{A}_{\mathrm{op}} = \sup_{u \in \mathbb S^{r-1}} \mg{Au}_2$. Then
@@ -118,14 +171,14 @@ For example, consider the one-variable function $f(x) = Gx + \frac{L}{2}x^2$. As
 \begin{align*}
     |x_{t+1} - x_t| = |x_{t+1}| = |(1-\lambda) - \eta G + \lambda (z_{t-1} - \alpha G)|
 \end{align*}
-Sending $|z_{t-1}| \to \infty$, this gap can become unbounded. The $\alpha$ dictating $z_{t-1}$'s progression grows with $\ve$, so this is (a priori) not an unrealistic scenario.
+Sending $|z_{t-1}| \to \infty$, this gap can become unbounded. The $\alpha$ dictating $z_{t-1}$'s progression grows with $\ve$, so this is (a priori) not an unrealistic scenario. Furthermore, we will restart the algorithm later, with $z_0 \neq x_0$, so $z_0$ really could be far away from $y_0$.
 
 \begin{lemma}
     Define the bounded-perturbation event
     \begin{align*}
         \mathfrak B_{t+1} \coloneqq \bigcap_{i=1}^r \set{\sqrt{dL_{\delta/rT}} \leq \mg{p_{t+1,i}} \leq \sqrt{3d \chi}}
     \end{align*}
-    Then on $\mathfrak B_{t+1}$, as long as $\eta \leq r/(12Ld \chi)$, we have
+    Then on $\mathfrak B_{t+1} \cap \mathfrak P_{t+1}$, as long as $\eta \leq r/(12Ld \chi)$, we have
     \begin{align*}
         f(y_{t+1}) \leq f(x_{t+1}) - \frac{\eta}{8} \mg{\grad f(x_{t+1})}^2 + C'L^2 \sigma^2 \chi^3 d^{3} 
     \end{align*}
@@ -151,7 +204,7 @@ Sending $|z_{t-1}| \to \infty$, this gap can become unbounded. The $\alpha$ dict
     \begin{align*}
         \mathfrak B_{t+1} \coloneqq \bigcap_{i=1}^r \set{\sqrt{dL_{\delta/rT}} \leq \mg{p_{t+1,i}} \leq \sqrt{3d \chi}}
     \end{align*}
-    We know that $\P(\mathfrak B_{t+1}) \geq 1 - \delta/rT$. Thus,
+    We know that $\P(\mathfrak B_{t+1}) \geq 1 - \delta/rT$ by Lemma~\ref{lem:bounded-p-norm}. Thus,
     \begin{align*}
         f(y_{t+1}) &\leq f(x_{t+1}) - \frac{\eta}{r} \sum_{i=1}^r |p_i^\top \grad f(x_{t+1})|^2 + \eta^2 \gamma \mg{\grad f(x_{t+1})}^2 + (L\eta^2 + \gamma)\mg{R_{t+1}}^2 \\
         &\quad + \frac{CLd \eta^2  \log(Tr/\delta)}{r} \cdot \frac 1r \sum_{i=1}^r |p_i^\top \grad f(x_{t+1})|^2
@@ -160,7 +213,7 @@ Sending $|z_{t-1}| \to \infty$, this gap can become unbounded. The $\alpha$ dict
     \begin{align*}
         f(y_{t+1}) \leq f(x_{t+1}) - \frac{3\eta}{4} \frac 1r \sum_{i=1}^r |p_i^\top \grad f(x_{t+1})|^2 + \eta^2 \mg{\grad f(x_{t+1})}^2 + C'L^2 \sigma^2 \chi^3 d^{3} 
     \end{align*} 
-    As long as  $\eta \leq 1/8$, $-3\eta/8 + \eta^2 \leq -\eta/4$, so using the previous lemma, we ensure
+    As long as  $\eta \leq 1/8$, $-3\eta/8 + \eta^2 \leq -\eta/4$, so using the previous lemma on $\mathfrak P_{t+1}$, we ensure
     \begin{align*}
         f(y_{t+1}) \leq f(x_{t+1}) - \frac{\eta}{8} \mg{\grad f(x_{t+1})}^2 + C'L^2 \sigma^2 \chi^3 d^{3} 
     \end{align*}
@@ -221,8 +274,8 @@ The standard coupling lemma comes from using $\mg{\grad f(x_{t+1})}^2 \leq 2L(f(
     As $\eta < 1/8$ we can absorb the last term into the first by changing the constant $C'$. Finally, after an application of the triangle inequality and Lemma~\ref{lem:concentration_bounds}, we have $\P(\mathfrak G_{t+1}) \geq 1-\delta/T$, which gives the statement of the lemma.
 \end{proof}
 
-\section{Mirror Descent and Linear Mixing}
-This lemma is the same as before.
+\section{Linear Mixing}
+This lemma explains how to choose the mixing parameter $\lambda$.
 \begin{lemma}
     \label{lem:xttozt}
     When $\lambda$ is chosen so $\frac{1-\lambda}{\lambda} = \frac{8Cd \gamma \chi\alpha}{\eta}$, the ``regret'' is bounded by
@@ -263,36 +316,10 @@ can be bounded by the ``Energy'' $V_{z_t}(x^*)$, which itself can be bounded by 
 
 This highlights a very general principle. To deal with martingale error terms with high probability, try bounding them by some other part of the equation which should have typical size $\Theta(1)$. In this case, that will be $V_{z_t}(x^*)$ for us.
 
-First, we highlight some intuition. Due to oscillatory cancellation, the typical size of the martingale term is much smaller than any deterministic inequality would suggest. This is because it is a martingale difference sequence.
-
-\begin{definition}[Martingale Difference Sequence]
-    $\set{\xi_t}_{t\geq 1}$ is a martingale difference sequence wrt filtration $\mathcal F_t$ if $\xi_t \in \mathcal F_t$ and 
-    \begin{align*}
-        \E[\xi_t \mid \mathcal F_{t-1}] = 0
-    \end{align*}
-\end{definition}
-The main intuition is that in a martingale difference sequence, the variance of the full sum is the sum of the variance of each $\xi_t$, which is vastly superior than including all the cross covariance terms $\Cov(\xi_i, \xi_j)$. This improves our bound substantially. 
-\begin{lemma}
-    Define $S_T = \sum_{t=1}^T \xi_t$. Then
-    \begin{align*}
-        \E[S_T^2] = \sum_{t=1}^T \E[\xi_t^2]
-    \end{align*}
-\end{lemma}
-\begin{proof}
-    We have
-    \begin{align*}
-        \E[M_T^2] = \sum \E[\xi_t^2] + 2\E[\sum_{i < j} \xi_i \xi_j]
-    \end{align*}
-    Now,
-    \begin{align*}
-        \E[\sum_{i < j} \xi_i \xi_j] = \sum_{i < j} \E[\E[\xi_i \xi_j \given \mathcal F_i]] = \sum_{i < j} \E[\xi_i \E[ \xi_j \given \mathcal F_i]] = 0.
-    \end{align*}
-\end{proof}
-
 \begin{lemma}
     Define
     \begin{align*}
-        \mathfrak M_{t+1} = \set{\left|\sum_{t=0}^{\tau-1} \sum_{i=1}^r \alpha \langle (I-p_ip_i^\top) \grad f(x_{t+1}), z_t-u \rangle\right| \leq \alpha \sqrt{Cr \sum_{t=0}^{\tau-1} \chi \mg{\grad f(x_t)}^2 V_{z_t}(u)}}
+        \mathfrak M_{t+1} = \set{\left|\sum_{t=0}^{\tau-1} \sum_{i=1}^r \alpha \langle (I-p_ip_i^\top) \grad f(x_{t+1}), z_t-u \rangle\right| \leq \alpha \sqrt{Cr \sum_{t=0}^{\tau-1} \chi^2 \mg{\grad f(x_t)}^2 V_{z_t}(u)}}
     \end{align*}
     Then
     \begin{align*}
@@ -304,7 +331,7 @@ The main intuition is that in a martingale difference sequence, the variance of 
     \begin{align*}
         &\left|\sum_{t=0}^{\tau-1} \sum_{i=1}^r \alpha \langle (I-p_ip_i^\top) \grad f(x_{t+1}), z_t-u \rangle \right| \\&\leq C \theta \sum_{t=0}^{\tau-1} \sum_{i=1}^r \log(CrT/\delta) \mg{\grad f(x_{t+1})}^2 \mg{z_t - u}^2 + \frac{1}{\theta} \log(\frac{CrT}{\delta})
     \end{align*}
-    Using $V_{z_t}(u) \geq \frac 12\mg{z_t - u}^2$ and balancing the two terms by carefully choosing $\theta$ we arrive at the statement of the lemma.
+    Using $V_{z_t}(u) \geq \frac 12\mg{z_t - u}^2$ and balancing the two terms by carefully choosing $\theta$ according to AM-GM $2\sqrt{ab} \leq a+b$, we arrive at the statement of the lemma.
 \end{proof}
 
 \section{Putting it all Together}
@@ -316,7 +343,7 @@ First, as in the proof of Mirror Descent, we bound the regret, then $V_{z_t}(x^*
     \begin{align*}
         &\sum_{t=0}^{\tau-1} \alpha \langle \grad f(x_t), x_t-x^* \rangle
         \\&\leq \frac{8Cd \gamma \chi}{r \eta} \alpha^2(f(y_0) - f(y_\tau)) -\frac{C\alpha^2d\gamma \chi}{2r} \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2  \\
-        &+\alpha \sqrt{ \frac C r \sum_{t=0}^{\tau-1} \chi \mg{\grad f(x_{t+1})}^2 V_{z_t}(x^*)} + \frac{C'(\alpha^2 T+\alpha T^2) \gamma L^2 \sigma^2 \chi^4 d^4}{r\eta}  \\
+        &+\alpha \sqrt{ \frac C r \sum_{t=0}^{\tau-1} \chi^2 \mg{\grad f(x_{t+1})}^2 V_{z_t}(x^*)} + \frac{C'(\alpha^2 T+\alpha T^2) \gamma L^2 \sigma^2 \chi^4 d^4}{r\eta}  \\
         &+ V_{z_0}(x^*) - V_{z_\tau}(x^*) + \frac{1}{4T} \sum_{t=0}^{\tau-1} V_{z_t}(x^*)
     \end{align*}
 \end{lemma}
@@ -332,7 +359,7 @@ First, as in the proof of Mirror Descent, we bound the regret, then $V_{z_t}(x^*
     \end{align*}
     From above we know that
     \begin{align*}
-        \alpha\sum_{t=0}^{\tau-1} \sum_{i=1}^r \langle (I- p_ip_i^\top) \grad f(x_{t+1}), z_t - u\rangle \leq \alpha \sqrt{Cr \sum_{t=0}^{\tau-1} \chi \mg{\grad f(x_{t+1})}^2 V_{z_t}(u)}
+        \alpha\sum_{t=0}^{\tau-1} \sum_{i=1}^r \langle (I- p_ip_i^\top) \grad f(x_{t+1}), z_t - u\rangle \leq \alpha \sqrt{Cr \sum_{t=0}^{\tau-1} \chi^2 \mg{\grad f(x_{t+1})}^2 V_{z_t}(u)}
     \end{align*}
     From Lemmas~\ref{lem:mixing-md} and~\ref{lem:tilde-grad-bound} we know that 
     \begin{align*}
@@ -344,7 +371,7 @@ First, as in the proof of Mirror Descent, we bound the regret, then $V_{z_t}(x^*
     \begin{align*}
         &\sum_{t=0}^{\tau-1} \alpha \langle \grad f(x_t), x_t-x^* \rangle
         \\&\leq \frac{8Cd \gamma \chi}{r \eta} \alpha^2(f(y_0) - f(y_\tau)) -\frac{C\alpha^2d\gamma \chi}{2r} \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2  \\
-        &+\alpha \sqrt{ \frac C r \sum_{t=0}^{\tau-1} \chi \mg{\grad f(x_{t+1})}^2 V_{z_t}(x^*)} + \frac{C'\alpha^2 T \gamma L^2 \sigma^2 \chi^4 d^4}{r\eta} + C' \alpha T^2 L^2\sigma^2 \chi^3 d^3  \\
+        &+\alpha \sqrt{ \frac C r \sum_{t=0}^{\tau-1} \chi^2 \mg{\grad f(x_{t+1})}^2 V_{z_t}(x^*)} + \frac{C'\alpha^2 T \gamma L^2 \sigma^2 \chi^4 d^4}{r\eta} + C' \alpha T^2 L^2\sigma^2 \chi^3 d^3  \\
         &+ V_{z_0}(x^*) - V_{z_\tau}(x^*) + \frac{1}{4T} \sum_{t=0}^{\tau-1} V_{z_t}(x^*)
     \end{align*}
     By using $r \leq d$ and $\eta < 1$ to handle the two quadratic terms we arrive at the statement of the lemma.
@@ -352,16 +379,16 @@ First, as in the proof of Mirror Descent, we bound the regret, then $V_{z_t}(x^*
 
 This next lemma is what we meant by bounding the martingale by other already-present $\Theta(1)$ terms. 
 \begin{lemma}[Energy Bound]
-    On $\bigcap_{t=1}^{T} (\mathfrak B_t \cap \mathfrak O_t \cap \mathfrak P_t \cap \mathfrak G_t \cap \mathfrak M_t)$, upon defining $M = \sup_{0 \leq t \leq T-1} V_{z_t}(x^*)$, choosing the slack $\gamma = 8$ and letting $\Theta \geq V_{z_0}(x^*)$ be any upper bound, we have
+    On $\bigcap_{t=1}^{T} (\mathfrak B_t \cap \mathfrak O_t \cap \mathfrak P_t \cap \mathfrak G_t \cap \mathfrak M_t)$, upon defining $M = \sup_{0 \leq t \leq T-1} V_{z_t}(x^*)$, choosing the slack $\gamma = 8\chi$ and letting $\Theta \geq V_{z_0}(x^*)$ be any upper bound, we have
     \begin{align*}
-        \frac{M}{2} \leq \frac{256Cd\chi}{r\eta}\alpha^2 (f(y_0) - f^*) + \Theta + \frac{C'(\alpha^2 T + \alpha T^2) L^2 \sigma^2 \chi^4 d^4}{r\eta}
+        \frac{M}{2} \leq \frac{256Cd\chi^2}{r\eta}\alpha^2 (f(y_0) - f^*) + \Theta + \frac{C'(\alpha^2 T + \alpha T^2) L^2 \sigma^2 \chi^4 d^4}{r\eta}
     \end{align*}
 \end{lemma}
 
 \begin{proof}
     By convexity we know that $f^* = f(x^*) \geq f(x) + \langle \grad f(x), x^* - x \rangle$. Rearranging, we get $\langle \grad f(x), x^* - x \rangle \geq f(x) - f^* \geq 0$. Using Young's inequality, we know that
     \begin{align*}
-        \alpha \sqrt{\frac{C}{r} \chi \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2 V_{z_t}(x^*)} \leq \frac{M}{4} + \alpha^2 \frac{4C\chi}{r} \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2
+        \alpha \sqrt{\frac{C}{r} \chi^2 \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2 V_{z_t}(x^*)} \leq \frac{M}{4} + \alpha^2 \frac{4C\chi^2}{r} \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2
     \end{align*}
     
     Therefore by the previous lemma, and using $\frac 1T \sum_{t=0}^{\tau-1} V_{z_\tau}(x^*) \leq \frac 14 M$, we know that
@@ -370,13 +397,13 @@ This next lemma is what we meant by bounding the martingale by other already-pre
         &+ V_{z_0}(x^*) + \frac{M}{4} + \frac{C'(\alpha^2 T + \alpha T^2)\gamma L^2 \sigma^2 \chi^4 d^4}{r\eta} 
         \\&+ \alpha^2 \frac{4C\chi}{r} \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2 + \frac{M}{4}
     \end{align*}
-    By choosing $\gamma = 8$, as $d \geq 1$, we know that
+    By choosing $\gamma = 8\chi$, as $d \geq 1$, we know that
     \begin{align*}
-        - \frac{C\alpha^2 d \gamma \chi}{2r} \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2 + \alpha^2 \frac{4C\chi}{r} \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2 \leq 0
+        - \frac{C\alpha^2 d \gamma \chi}{2r} \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2 + \alpha^2 \frac{4C\chi^2}{r} \sum_{t=0}^{\tau-1} \mg{\grad f(x_{t+1})}^2 \leq 0
     \end{align*}
     By using $f(y_0) - f(y_\tau) \leq f(y_0) - f^*$ along with $V_{z_0}(x^*) \leq \Theta$, and taking supremum of both sides, we have
     \begin{align*}
-        M \leq \frac{64 C d \chi}{r\eta}\alpha^2 (f(y_0) - f^*) + \Theta + \frac{M}{2} + \frac{C'(\alpha^2 T + \alpha T^2) L^2 \sigma^2 \chi^4 d^4}{r\eta} 
+        M \leq \frac{64 C d \chi^2}{r\eta}\alpha^2 (f(y_0) - f^*) + \Theta + \frac{M}{2} + \frac{C'(\alpha^2 T + \alpha T^2) L^2 \sigma^2 \chi^4 d^4}{r\eta} 
     \end{align*}
     which completes the proof.
 \end{proof}
@@ -384,11 +411,11 @@ This next lemma is what we meant by bounding the martingale by other already-pre
 \begin{theorem}[Halving Function Objective]
     Assuming the initial error $f(x_0) - f^* \leq \Delta$, and defining $\overline x = 1/T \sum_{t=0}^{T-1} x_t$, by choosing
     \begin{align*}
-        \eta = \frac{r}{4CLd \chi}, \qquad \alpha = \frac{r}{16 C d\chi} \sqrt{\frac{\Theta}{L\Delta}}, \qquad\sigma^2 \leq \frac{r^3 \Delta^{3/2}}{4C' L^{7/2} \chi^6 d^6 \sqrt{\Theta}}, \qquad r \geq 16\chi
+        \eta = \frac{r}{4CLd \chi}, \qquad \alpha = \frac{r}{16 C d\chi^{3/2}} \sqrt{\frac{\Theta}{L\Delta}}, \qquad\sigma^2 \leq \frac{r^3 \Delta^{3/2}}{4C' L^{7/2} \chi^{15/2} d^6 \sqrt{\Theta}}, \qquad r \geq 16\chi
     \end{align*}
     In 
     \begin{align*}
-        T=\frac{256 C d \chi}{r} \sqrt{\frac{L\Theta}{\Delta}}
+        T=\frac{256 C d \chi^{3/2}}{r} \sqrt{\frac{L\Theta}{\Delta}}
     \end{align*} iterations we have $f(\overline x) - f^* \leq \Delta/2$ with probability at least $1-5\delta$.
 \end{theorem}
 \begin{proof}
@@ -398,18 +425,18 @@ This next lemma is what we meant by bounding the martingale by other already-pre
     \begin{align*}
         &\sum_{t=0}^{T-1} \alpha \langle \grad f(x_t), x_t-x^* \rangle
         \\&\leq \frac{64Cd \chi}{r \eta} \alpha^2(f(y_0) - f(y_{T})) -\frac{C\alpha^2d\gamma \chi}{2r} \sum_{t=0}^{T-1} \mg{\grad f(x_{t+1})}^2  \\
-        &+\alpha \sqrt{ \frac C r \sum_{t=0}^{T-1} \chi \mg{\grad f(x_{t+1})}^2 V_{z_t}(x^*)} + \frac{C'(\alpha^2 T+\alpha T^2)  L^2 \sigma^2 \chi^4 d^4}{r\eta}  \\
+        &+\alpha \sqrt{ \frac C r \sum_{t=0}^{T-1} \chi^2 \mg{\grad f(x_{t+1})}^2 V_{z_t}(x^*)} + \frac{C'(\alpha^2 T+\alpha T^2)  L^2 \sigma^2 \chi^4 d^4}{r\eta}  \\
         &+ V_{z_0}(x^*) - V_{z_T}(x^*) + \frac{1}{4T} \sum_{t=0}^{T-1} V_{z_t}(x^*)
     \end{align*}
     Using Young's inequality in exactly the way as the previous lemma, we can rearrange this to
     \begin{align*}
         &\sum_{t=0}^{T-1} \alpha \langle \grad f(x_t), x_t-x^* \rangle
-        \\&\leq \frac{64Cd \chi}{r \eta} \alpha^2(f(y_0) - f^*) + \frac{C'(\alpha^2 T + \alpha T^2) L^2 \sigma^2 \chi^4 d^4}{r\eta} + \Theta + M/4 \\
+        \\&\leq \frac{64Cd \chi^2}{r \eta} \alpha^2(f(y_0) - f^*) + \frac{C'(\alpha^2 T + \alpha T^2) L^2 \sigma^2 \chi^4 d^4}{r\eta} + \Theta + M/4 \\
     \end{align*}
     Using the previous lemma, we have
     \begin{align*}
         &\sum_{t=0}^{T-1} \alpha \langle \grad f(x_t), x_t-x^* \rangle \\
-        &\leq \frac{128Cd\chi}{r\eta} \alpha^2 (f(y_0) - f^*) + \frac{C'(\alpha^2 T + \alpha T^2) L^2 \sigma^2 \chi^4 d^4}{r\eta} + 2\Theta
+        &\leq \frac{128Cd\chi^2}{r\eta} \alpha^2 (f(y_0) - f^*) + \frac{C'(\alpha^2 T + \alpha T^2) L^2 \sigma^2 \chi^4 d^4}{r\eta} + 2\Theta
     \end{align*}
     Let $\overline x = \sum_{t=0}^{T-1} x_t$. By convexity, 
     \begin{align*}
@@ -417,27 +444,27 @@ This next lemma is what we meant by bounding the martingale by other already-pre
     \end{align*}
     Therefore, assuming the initial objective gap $f(y_0) - f^* \leq \Delta$,
     \begin{align*}
-        f(\overline x) - f^* \leq \frac{128Cd\chi \alpha \Delta }{r\eta T} + \frac{2\Theta}{\alpha T} + \frac{C'(\alpha + T) L^2 \sigma^2 \chi^4 d^4}{r\eta}
+        f(\overline x) - f^* \leq \frac{128Cd\chi^2 \alpha \Delta }{r\eta T} + \frac{2\Theta}{\alpha T} + \frac{C'(\alpha + T) L^2 \sigma^2 \chi^4 d^4}{r\eta}
     \end{align*}
     Now choose the learning rate $\eta = r/(4CLd \chi)$. Then we get
     \begin{align*}
-        f(\overline x) - f^* \leq \frac{512 C^2 d^2 L \chi^2 \alpha \Delta}{r^2 T} + \frac{2\Theta}{\alpha T} + \frac{C'(\alpha + T) L^3 \sigma^2 \chi^5 d^5}{r^2}
+        f(\overline x) - f^* \leq \frac{512 C^2 d^2 L \chi^3 \alpha \Delta}{r^2 T} + \frac{2\Theta}{\alpha T} + \frac{C'(\alpha + T) L^3 \sigma^2 \chi^5 d^5}{r^2}
     \end{align*}
     By choosing 
     \begin{align*}
-        \alpha = \frac{r}{16 C d\chi} \sqrt{\frac{\Theta}{L\Delta}},
+        \alpha = \frac{r}{16 C d\chi^{3/2}} \sqrt{\frac{\Theta}{L\Delta}},
     \end{align*}
     and
     \begin{align*}
-        T = \frac{256 C d \chi}{r} \sqrt{\frac{L\Theta}{\Delta}}
+        T = \frac{256 C d \chi^{3/2}}{r} \sqrt{\frac{L\Theta}{\Delta}}
     \end{align*}
     as $L \geq 1$ we have $T \geq \alpha$, so the above is at most
     \begin{align*}
-        \frac{\Delta}{4} + \sqrt{\frac{L\Theta}{\Delta}}\frac{C' L^3 \sigma^2 \chi^6 d^6}{r^3}
+        \frac{\Delta}{4} + \sqrt{\frac{L\Theta}{\Delta}}\frac{C' L^3 \sigma^2 \chi^{15/2} d^6}{r^3}
     \end{align*}
     Then as long as
     \begin{align*}
-        \sigma^2 \leq \frac{r^3 \Delta^{3/2}}{4C' L^{7/2} \chi^6 d^6 \sqrt{\Theta}}
+        \sigma^2 \leq \frac{r^3 \Delta^{3/2}}{4C' L^{7/2} \chi^{15/2} d^6 \sqrt{\Theta}}
     \end{align*}
     We have
     \begin{align*}
@@ -446,4 +473,16 @@ This next lemma is what we meant by bounding the martingale by other already-pre
     thereby halving the objective value. This completes the proof.
 \end{proof}
 
-\textbf{TODO: RESTARTS}
+ We want to restart this halving procedure $\log(1/\ve)$ times so we can converge to a point with objective gap $f(\overline x) - f^* \leq \ve$. However, the $\overline x$ returned might not satisfy $V_{\overline x}(x^*) \leq \Theta$. Indeed, this valuation could actually go up if there is multiple minima. This point is actually unmentioned and unresolved in~\cite{allenZhu2016linear}. The simple fix is to notice above that the requirement $z_0=y_0$ is not necessary. Actually, the only fact we used about $z_0$ was that $V_{z_0}(x^*) \leq \Theta$. So by restarting the algorithm $n=\log_2(\Delta/\ve)$ times with $x_0 = \overline x = y_0$, and $z_0$ as it's original value each time, we can find a point with $f(\overline x) - f^* \leq \ve$ in
+ \begin{align*}
+    T = \widetilde{O}\left(\frac{d}{r} \sqrt{\frac{L\Theta}{\ve}} +\frac{d}{r} \sqrt{\frac{L\Theta}{2\ve}} + \frac{d}{r} \sqrt{\frac{L\Theta}{4\ve}} + \cdots \right) = \widetilde{O}\left(\frac{d}{r} \sqrt{\frac{L\Theta}{\Delta}}\right) 
+ \end{align*}
+iterations, which yields the following theorem:
+\begin{theorem}
+    By restarting Algorithm~\ref{alg:zo-linear-mixing} $\log_2(\Delta/\ve)$ many times, we find a point $\overline x$ so that $f(\overline x) - f^* \leq \ve$ in 
+    \begin{align*}
+        T = \widetilde{O}\left(\frac{d}{r} \sqrt{\frac{L\Theta}{\ve}}\right) 
+    \end{align*}
+    iterations.
+\end{theorem}
+When $r=d$, this matches the asymptotically optimal running time to converge to an $\ve$-optimal point for a $L$-smooth convex function, up to logarithmic factors. To the best of our knowledge, this is the first zero-order accelerated gradient descent algorithm  for smooth convex functions that achieves the optimal running time (up to log factors) which can be run once and output a solution with high probability. On the contrary, expectation-based methods need to run $\log(1/\delta)$ independent copies to ensure they work with high probability. We believe this analysis gives a strong intuition about the fluctuations one often sees when running the algorithm in practice, as we have directly compared the martingale term to the progress and distance to optimum.

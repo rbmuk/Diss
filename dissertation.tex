@@ -21,10 +21,11 @@
 % The names must exactly match the corresponding \include commands below.
 %\includeonly{mirror_conv}
 %\includeonly{linear_mixing}
-% \includeonly{FOSP_eggroll}
+%\includeonly{FOSP_eggroll}
+%\includeonly{related_work}
 
 \begin{document}
-
+\raggedbottom
 \frontmatter
 \begin{titlepage}
   \thispagestyle{empty}
@@ -56,6 +57,8 @@
 \tableofcontents
 
 \mainmatter
+\include{related_work}
+\include{preliminaries}
 \include{mirror_conv}
 \include{linear_mixing}
 \include{FOSP_eggroll}

@@ -1,9 +1,44 @@
-\begin{thebibliography}{5}
+\begin{thebibliography}{18}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Ahmadi et~al.(2013)Ahmadi, Olshevsky, Parrilo, and Tsitsiklis]{ahmadi2013nphardness}
+Amir~Ali Ahmadi, Alex Olshevsky, Pablo~A. Parrilo, and John~N. Tsitsiklis.
+\newblock Np-hardness of deciding convexity of quartic polynomials and related problems.
+\newblock \emph{Mathematical Programming}, 137\penalty0 (1--2):\penalty0 453--476, 2013.
+\newblock \doi{10.1007/s10107-011-0499-2}.
+
+\bibitem[Allen-Zhu and Orecchia(2016)]{allenZhu2016linear}
+Zeyuan Allen-Zhu and Lorenzo Orecchia.
+\newblock Linear coupling: An ultimate unification of gradient and mirror descent.
+\newblock \emph{arXiv preprint arXiv:1407.1537}, 2016.
+\newblock \doi{10.48550/arXiv.1407.1537}.
+\newblock URL \url{https://arxiv.org/abs/1407.1537}.
+
+\bibitem[Anandkumar and Ge(2016)]{anandkumar2016efficient}
+Animashree Anandkumar and Rong Ge.
+\newblock Efficient approaches for escaping higher order saddle points in non-convex optimization.
+\newblock In \emph{Proceedings of the 29th Annual Conference on Learning Theory}, volume~49 of \emph{Proceedings of Machine Learning Research}, pages 81--102. PMLR, 2016.
+\newblock URL \url{https://proceedings.mlr.press/v49/anandkumar16.html}.
+
+\bibitem[Balasubramanian and Ghadimi(2018)]{balasubramanian2018zeroth}
+Krishnakumar Balasubramanian and Saeed Ghadimi.
+\newblock Zeroth-order (non)-convex stochastic optimization via conditional gradient and gradient updates.
+\newblock In \emph{Advances in Neural Information Processing Systems}, volume~31, 2018.
+
+\bibitem[Ghadimi and Lan(2013)]{ghadimi2013stochastic}
+Saeed Ghadimi and Guanghui Lan.
+\newblock Stochastic first- and zeroth-order methods for nonconvex stochastic programming.
+\newblock \emph{arXiv preprint arXiv:1309.5549}, 2013.
+\newblock URL \url{https://arxiv.org/abs/1309.5549}.
+
+\bibitem[Hansen and Ostermeier(2001)]{hansen2001completely}
+Nikolaus Hansen and Andreas Ostermeier.
+\newblock Completely derandomized self-adaptation in evolution strategies.
+\newblock \emph{Evolutionary Computation}, 9\penalty0 (2):\penalty0 159--195, 2001.
 
 \bibitem[Jin et~al.(2019)Jin, Netrapalli, Ge, Kakade, and Jordan]{jin2019short}
 Chi Jin, Praneeth Netrapalli, Rong Ge, Sham~M. Kakade, and Michael~I. Jordan.
@@ -17,11 +52,38 @@ B{\'e}atrice Laurent and Pascal Massart.
 \newblock \emph{The Annals of Statistics}, 28\penalty0 (5):\penalty0 1302--1338, 2000.
 \newblock \doi{10.1214/aos/1015957395}.
 
+\bibitem[Nesterov and Spokoiny(2017)]{nesterov2017random}
+Yurii Nesterov and Vladimir Spokoiny.
+\newblock Random gradient-free minimization of convex functions.
+\newblock \emph{Foundations of Computational Mathematics}, 17\penalty0 (2):\penalty0 527--566, 2017.
+\newblock \doi{10.1007/s10208-015-9296-2}.
+
+\bibitem[Nesterov(1983)]{nesterov1983method}
+Yurii~E. Nesterov.
+\newblock A method for solving the convex programming problem with convergence rate $o(1/k^2)$.
+\newblock \emph{Soviet Mathematics Doklady}, 27\penalty0 (2):\penalty0 372--376, 1983.
+
+\bibitem[Rechenberg(1965)]{rechenberg1965cybernetic}
+Ingo Rechenberg.
+\newblock Cybernetic solution path of an experimental problem.
+\newblock Technical Report Library Translation 1122, Royal Aircraft Establishment, Farnborough, UK, 1965.
+\newblock Translated by B. F. Toms.
+
+\bibitem[Rechenberg(1973)]{rechenberg1973evolutionsstrategie}
+Ingo Rechenberg.
+\newblock \emph{Evolutionsstrategie: Optimierung technischer Systeme nach Prinzipien der biologischen Evolution}.
+\newblock Frommann-Holzboog, Stuttgart, 1973.
+
 \bibitem[Ren et~al.(2023)Ren, Tang, and Li]{ren2023escaping}
 Zhaolin Ren, Yujie Tang, and Na~Li.
 \newblock Escaping saddle points in zeroth-order optimization: The power of two-point estimators.
 \newblock In \emph{Proceedings of the 40th International Conference on Machine Learning}, 2023.
 \newblock URL \url{https://arxiv.org/abs/2209.13555}.
+
+\bibitem[Salimans et~al.(2017)Salimans, Ho, Chen, Sidor, and Sutskever]{salimans2017evolution}
+Tim Salimans, Jonathan Ho, Xi~Chen, Szymon Sidor, and Ilya Sutskever.
+\newblock Evolution strategies as a scalable alternative to reinforcement learning.
+\newblock \emph{arXiv preprint arXiv:1703.03864}, 2017.
 
 \bibitem[Sarkar et~al.(2025)Sarkar, Fellows, Duque, Letcher, Villares, Sims, Wibault, Samsonov, Cope, Liesen, Li, Seier, Wolf, Berdica, Mohl, Goldie, Courville, Sevegnani, Whiteson, and Foerster]{sarkar2025evolution}
 Bidipta Sarkar, Mattie Fellows, Juan~Agustin Duque, Alistair Letcher, Antonio~Le{\'o}n Villares, Anya Sims, Clarisse Wibault, Dmitry Samsonov, Dylan Cope, Jarek Liesen, Kang Li, Lukas Seier, Theo Wolf, Uljad Berdica, Valentin Mohl, Alexander~David Goldie, Aaron Courville, Karin Sevegnani, Shimon Whiteson, and Jakob~Nicolaus Foerster.
@@ -30,9 +92,20 @@ Bidipta Sarkar, Mattie Fellows, Juan~Agustin Duque, Alistair Letcher, Antonio~Le
 \newblock \doi{10.48550/arXiv.2511.16652}.
 \newblock URL \url{https://arxiv.org/abs/2511.16652}.
 
+\bibitem[Su et~al.(2016)Su, Boyd, and Cand{\`e}s]{su2016differential}
+Weijie Su, Stephen Boyd, and Emmanuel~J. Cand{\`e}s.
+\newblock A differential equation for modeling nesterov's accelerated gradient method: Theory and insights.
+\newblock \emph{Journal of Machine Learning Research}, 17\penalty0 (153):\penalty0 1--43, 2016.
+\newblock URL \url{https://www.jmlr.org/papers/v17/15-084.html}.
+
 \bibitem[Vershynin(2018)]{vershynin2018high}
 Roman Vershynin.
 \newblock \emph{High-Dimensional Probability: An Introduction with Applications in Data Science}.
 \newblock Cambridge University Press, 2018.
+
+\bibitem[Wierstra et~al.(2014)Wierstra, Schaul, Glasmachers, Sun, Peters, and Schmidhuber]{wierstra2014natural}
+Daan Wierstra, Tom Schaul, Tobias Glasmachers, Yi~Sun, Jan Peters, and J{\"u}rgen Schmidhuber.
+\newblock Natural evolution strategies.
+\newblock \emph{Journal of Machine Learning Research}, 15\penalty0 (27):\penalty0 949--980, 2014.
 
 \end{thebibliography}

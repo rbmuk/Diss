@@ -1,0 +1,24 @@
+\chapter[Related Work]{Related Work}
+\label{chap:related-work}
+
+\section{Zeroth-Order Optimization and Evolutionary Strategies}
+The first evolutionary strategy originated in Rechenberg's experimental work on aerodynamic design. In a wind-tunnel experiment, he repeatedly applied small random mutations to the five joint angles of a segmented plane, retaining a mutation whenever it reduced measured drag. After only around 300 mutations, this process was able to find a minimum-drag configuration~\cite{rechenberg1965cybernetic}. Later, he developed the theoretical basis behind the $(1+1)$-ES and the celebrated $1/5$ success rule \cite{rechenberg1973evolutionsstrategie}. His was the first of many algorithms which are now known as zeroth-order optimization algtorithms, who can query an oracle $f(x)$ but do not have access to its gradient $\grad f(x)$. 
+
+Evolutionary strategies have been developed further since then. Instead of just using one mutation per time step, one could use a larger population size. The question then becomes, how to use the recombine the function evaluations most effectively. This led to~\cite{hansen2001completely} developing Covariance Matrix Adaptation Evolution Strategy (CMA-ES) that adopts a Gaussian distribution over candidate solutions, gradually moving the mean towards a weighted average of the best candidates and updating the covariance to align with directions that repeatedly produce improvement. 
+
+Next came Natural Evolutionary Strategies (NES) which reduces expected fitness using the score-function identity $\grad_\theta \mbb E_{z \sim p_\theta}[f(z)] = \mbb E_{z \sim p_\theta}[f(z) \grad_\theta \log p_\theta(z)]$ \cite{wierstra2014natural} then rescaling this gradient estimate using an approximate Fisher information preconditioner. The main idea is that the important geometry is induced by the KL divergence between two policies, not the raw gradient in $\theta$. While these methods demonstrated remarkable empirical performance, the problem is that this Fisher preconditioner and covariance matrix used in CMA-ES are $d \times d$, which is impractical for large ML models.
+
+\section{Scalable Zeroth-Order Methods}
+This gave rise to scalable zeroth-order methods. \cite{salimans2017evolution} directly optimize the smoothed surrogate $f_\sigma(x) = \mbb E_{p \sim \mathcal N(0,I)}[f(x + \sigma p)]$ of $f$ whose derivative satisfies $\grad_x f_\sigma(x) = \frac{1}{\sigma} \mbb E_{p \sim \mathcal N(0,I)}[f(x+\sigma p) p]$. They then use the Monte-Carlo estimator with $r$ parallel workers
+\begin{align*}
+    \frac{1}{r} \sum_{i=1}^r \frac{f(x+ \sigma p_i) - f(x-\sigma p_i)}{2\sigma} p_i
+\end{align*} 
+to repeatedly update the parameters thereby decreasing $f_\sigma(x)$. To scale this approach, instead of sharing full perturbations across workers, they use pseudo-random generators to sample perturbations, and then they only need to share the seeds between CPUs, allowing each GPU to reconstruct every perturbation locally. Marking the first time evolutionary strategies was scaled, they were able to use over 1000 parallel workers. 
+
+For large ML models with trillions of parameters, 1000 parallel workers is not nearly enough to optimize losses in any reasonable time. The central bottleneck is that, with $r$ parallel workers, each needs to hold $O(r \times d)$ parameters where $d$ is the dimension the each Gaussian perturbations. This is simply impossible to scale to large population size as $d$ is too large. \cite{sarkar2025evolution} have the solution: instead of using full Gaussian perturbations $P \sim \mathcal N(0, I_{d \times m})$, we can use low-rank perturbations $E = \frac{1}{\sqrt{k}} AB^\top$ where $A \sim \mathcal N(0, I_{d\times k})$ and $B \sim \mathcal N(0, I_{m \times k})$. Then, we can exploit $u(M + \sigma E)^\top = uM^\top + \frac{\sigma}{\sqrt{k}} (uB)A^\top$. They were able to scale evolutionary strategies for the first time to millions of parallel workers, demonstrating that zeroth-order methods can be used in practice for large ML models. 
+
+\section{Nonconvex Optimization and Saddle-Point Escape}
+
+\section{Accelerated Optimization}
+
+\section{Continuous-Time Interpretations of Acceleration}

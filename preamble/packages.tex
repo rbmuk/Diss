@@ -18,8 +18,18 @@
 \usepackage{float}
 
 % Formatting
-\usepackage[a4paper,margin=3.25cm,includeheadfoot]{geometry}
+\usepackage[
+  inner=3.5cm,
+  outer=3cm,
+  top=3.25cm,
+  bottom=3.25cm,
+  includeheadfoot
+]{geometry}
 \usepackage{setspace}
+\doublespacing
+
+% Reduce vertical space around displayed equations
+\setdisplayskipstretch{0.6}
 \usepackage{enumitem}
 \usepackage{microtype}
 \usepackage{braket}
@@ -30,5 +40,12 @@
 % Load links last (cleveref must follow hyperref).
 \usepackage[hidelinks]{hyperref}
 \usepackage[nameinlink,noabbrev]{cleveref}
+
+% Make algorithmic-line anchors unique when the document contains multiple
+% algorithms (the line counter itself restarts in every algorithmic block).
+\makeatletter
+\providecommand{\theHALG@line}{}
+\renewcommand{\theHALG@line}{\thealgorithm.\arabic{ALG@line}}
+\makeatother
 
 \graphicspath{{figures/}{./}}
