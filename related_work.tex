@@ -8,17 +8,68 @@ Evolutionary strategies have been developed further since then. Instead of just 
 
 Next came Natural Evolutionary Strategies (NES) which reduces expected fitness using the score-function identity $\grad_\theta \mbb E_{z \sim p_\theta}[f(z)] = \mbb E_{z \sim p_\theta}[f(z) \grad_\theta \log p_\theta(z)]$ \cite{wierstra2014natural} then rescaling this gradient estimate using an approximate Fisher information preconditioner. The main idea is that the important geometry is induced by the KL divergence between two policies, not the raw gradient in $\theta$. While these methods demonstrated remarkable empirical performance, the problem is that this Fisher preconditioner and covariance matrix used in CMA-ES are $d \times d$, which is impractical for large ML models.
 
-\section{Scalable Zeroth-Order Methods}
-This gave rise to scalable zeroth-order methods. \cite{salimans2017evolution} directly optimize the smoothed surrogate $f_\sigma(x) = \mbb E_{p \sim \mathcal N(0,I)}[f(x + \sigma p)]$ of $f$ whose derivative satisfies $\grad_x f_\sigma(x) = \frac{1}{\sigma} \mbb E_{p \sim \mathcal N(0,I)}[f(x+\sigma p) p]$. They then use the Monte-Carlo estimator with $r$ parallel workers
+\section{Scalable Evolutionary Strategies}
+This gave rise to scalable ES. \cite{salimans2017evolution} directly optimize the smoothed surrogate $f_\sigma(x) = \mbb E_{p \sim \mathcal N(0,I)}[f(x + \sigma p)]$ of $f$ whose derivative satisfies $\grad_x f_\sigma(x) = \frac{1}{\sigma} \mbb E_{p \sim \mathcal N(0,I)}[f(x+\sigma p) p]$. They then use the Monte-Carlo estimator with $r$ parallel workers
 \begin{align*}
     \frac{1}{r} \sum_{i=1}^r \frac{f(x+ \sigma p_i) - f(x-\sigma p_i)}{2\sigma} p_i
 \end{align*} 
 to repeatedly update the parameters thereby decreasing $f_\sigma(x)$. To scale this approach, instead of sharing full perturbations across workers, they use pseudo-random generators to sample perturbations, and then they only need to share the seeds between CPUs, allowing each GPU to reconstruct every perturbation locally. Marking the first time evolutionary strategies was scaled, they were able to use over 1000 parallel workers. 
 
-For large ML models with trillions of parameters, 1000 parallel workers is not nearly enough to optimize losses in any reasonable time. The central bottleneck is that, with $r$ parallel workers, each needs to hold $O(r \times d)$ parameters where $d$ is the dimension the each Gaussian perturbations. This is simply impossible to scale to large population size as $d$ is too large. \cite{sarkar2025evolution} have the solution: instead of using full Gaussian perturbations $P \sim \mathcal N(0, I_{d \times m})$, we can use low-rank perturbations $E = \frac{1}{\sqrt{k}} AB^\top$ where $A \sim \mathcal N(0, I_{d\times k})$ and $B \sim \mathcal N(0, I_{m \times k})$. Then, we can exploit $u(M + \sigma E)^\top = uM^\top + \frac{\sigma}{\sqrt{k}} (uB)A^\top$. They were able to scale evolutionary strategies for the first time to millions of parallel workers, demonstrating that zeroth-order methods can be used in practice for large ML models. 
-
-\section{Nonconvex Optimization and Saddle-Point Escape}
+For large ML models with trillions of parameters, 1000 parallel workers is not nearly enough to optimize losses in any reasonable time. The central bottleneck is that, with $r$ parallel workers, each needs to hold $O(r \times d)$ parameters where $d$ is the dimension the each Gaussian perturbations. This is simply impossible to scale to large population size as $d$ is too large. \cite{sarkar2025evolution} have the solution: instead of using full Gaussian perturbations $P \sim \mathcal N(0, I_{d \times m})$, we can use low-rank perturbations $E = \frac{1}{\sqrt{k}} AB^\top$ where $A \sim \mathcal N(0, I_{d\times k})$ and $B \sim \mathcal N(0, I_{m \times k})$. Then, we can exploit $u(M + \sigma E)^\top = uM^\top + \frac{\sigma}{\sqrt{k}} (uB)A^\top$. They were able to scale evolutionary strategies for the first time to millions of parallel workers, demonstrating that zeroth-order methods really can be used in practice for modern ML models. 
 
 \section{Accelerated Optimization}
+For convex functions, Gradient descent already achieves an $O(L\mg{x_0-x^*}^2/\ve)$ convergence to an $\ve$-optimal point $f(x) - f(x^*) \leq \ve$, where $x^* \in \mathrm{argmin}_{x \in \R^d} f(x)$. For $L$-smooth and $\mu$-strongly convex functions, gradient descent achieves $O\left(\frac{L}{\mu} \log(\frac{1}{\ve})\right)$ convergence to an $\ve$-optimal point. But can we do better?
+
+\cite{polyak1964some} introduced the Heavy Ball Method which achieves the accelerated rate of $O\left(\sqrt{\frac{L}{\mu}} \log(\frac{1}{\ve})\right)$ for strongly convex quadratics but may not even converge for general convex $f$. The algorithm included the momentum term $(x_k - x_{k-1})$,
+\begin{align*}
+    x_{k+1} = x_k - \eta \grad f(x_k) + \beta(x_k - x_{k-1})
+\end{align*}
+Then in his seminal work,~\cite{nesterov1983method} introduced Accelerated Gradient Descent by forming the ``lookahead'' term $y_k$ and time-varying $\beta_k = (k-1)/(k+2)$,
+\begin{align*}
+    y_k = x_k + \beta_k (x_k - x_{k-1}), \quad x_{k+1} = y_k - \eta \grad f(y_k)
+\end{align*}
+For general convex $f$, it converges to an $\ve$-optimal point in $O(1/\sqrt{\ve})$ iterations. By restarting this AGD every $O(\sqrt{L/\mu})$ iterations, Nesterov's AGD attains the same $O\left(\sqrt{\frac{L}{\mu}} \log(\frac{f(x_0) - f^*}{\ve})\right)$ convergence for all $\mu$-strongly convex functions, not just quadratics. 
+
+While Nesterov's AGD is poweful, it is relatively unintuitive, and little is known why $\beta_k$ is chosen to be so outside of an algebraic trick to telescope a series. \cite{allenZhu2016linear} introduce linear coupling, which provides a relatively intuitive explanation of acceleration. Instead of a mysterious lookahead point, one maintains a gradient sequence $y_k$ and a mirror sequence $z_k$. Each are updated at the gradient $\grad f(x_k)$, but they give differing answers of where to go next. Linear coupling says to go to the convex combination $x_{k+1} = \lambda z_k + (1-\lambda) y_k$. By carefully tuning the mirror descent and coupling parameters, they show a restarted version of this scheme achieves the same acceleration for convex functions as Nesterov's AGD. This framework will become the basis for Chapter~\ref{chap:linear-mixing} and the motivation for investigating Zeroth-Order Mirror descent in Chapter~\ref{chap:zo-mirror-descent}. 
+
+~\cite{nesterov2017random} developed an accelerated random gradient-free scheme for smooth convex functions using Gaussian search directions obtaining an expected $O(d^2/T^2)$ rate in their normalization. Typically, they posit, zeroth-order methods take $d$ times longer than their first-order counterparts. They emphasize that accelerated methods are more sensitive to oracle errors because inexact oracle errors can propogate through momentum (\cite{devolder2014first}). Our analysis in Chapter~\ref{chap:linear-mixing} precisely quantifies this accumulated error in the linear mixing framework. 
 
 \section{Continuous-Time Interpretations of Acceleration}
+One possible interpretation of acceleration comes from investigating what happens as the step size $\eta \to 0$. \cite{su2016differential} show that the ODE arising from taking the step size in Nesterov's accelerated gradient descent yields
+\begin{align*}
+    \ddot{X_t} + \frac{3}{t} \dot X_t + \grad f(X_t) = 0 
+\end{align*}
+It is surprising that a first-order method yields a second-order ODE. They prove that this ODE also achieves $O(1/t^2)$ convergence to an $\ve$-optimal point for convex $f$. The constant $3 = 2 + 1$ arising from $(k-1)/(k+2) \approx 1 - 3/k$ turns out to be of critical importance. Namely, it is the smallest constant yielding the $O(1/t^2)$ acceleration. Under suitable normalization, they show this ODE approaches Nesterov's AGD in a maximal sense. They show it also converges at rate $O(1/T^3)$ for strongly convex $f$, and posit a better Lyapunov could yield the same rate for the discrete version, but this remains open. 
+
+Future work in this direction includes~\cite{attouch2024convex} who analyze the Tikhonov reguarlized version of the previous ODE
+\begin{align*}
+    \ddot X_t + \frac{\alpha}{t} \dot X_t + \grad f(X_t) + \frac{c}{t^2}X_t = 0.
+\end{align*}
+This second-order ODE has remarkable properties. For $\alpha > 3$, $f(X_t) - f^* = O(1/t^2)$, the trajectory $\mg{\dot X_t} = O(1/t)$ is bounded, and some subsequence converges to the minimum norm solution $\liminf_{t \to \infty} \mg{X_t - x^*} = 0$. The simple addition of the term $c/t^2 X_t$ to the dynamics provides these extra properties. While we find this result striking and believe discretizing continuous-time dynamics with established convergence properties may be fruitful to developing new optimization algorithms, primarily due to their physical interpretations, we have not pursued it here. 
+
+\section{Nonconvex Optimization and Saddle-Point Escape}
+Unlike the convex setting where we can always achieve small objective gap $f(x) - \inf_{x \in \R^d} f(x) < \ve$ for every $\ve > 0$, this is intractable for non-convex functions in the worst case. Instead, the desired criteria becomes first- and second-order stationary points (FOSPs and SOSPs). When $f$ is $L$-smooth and $\rho$-Hessian Lipschitz, the point $x \in \R^d$ is a first-order stationary point of $f(x)$ if $\mg{\grad f(x)} \leq \ve$, and it is a second-order stationary point if $\lambda_{\mathrm{min}}(\grad^2 f(x)) \geq -\sqrt{\rho\ve}$. Locally around a second-order stationary point $x$, descent directions are governed by third-order terms. Furthermore, for many structured nonconvex ML objectives, all second-order stationary points are (approximately) global minima (\cite{10.1145/3418526}). Higher order guarantees are relatively uncommon, while third-order stationary points can be found in polynomial time under reasonable smoothness assumptions, finding a fourth-order local minima is NP-hard in general (\cite{anandkumar2016efficient}). 
+
+\cite{nesterov2006cubic} introduced cubic-reguarlized Newton, which finds second-order stationary points using gradients and Hessians. Unfortunately, computing the full $d \times d$ Hessian is not practical for large ML models. So, there was a need for algorithms which can converge to SOSPs without accessing the full Hessian. \cite{ge2015escaping} show that, for functions satisfying the strict saddle condition, stochsatic gradient descent converges to a local minimum in a polynomial number of iterations. However, the while the dependence on $d$ is polynomial, it is substantially large. 
+
+\cite{jin2017escape} introduced the first (nearly) dimension free saddle escape optimization algorithm, by randomly perturbing the iterate upon reaching a FOSP. They show that, with high probability, sequences generated by gradient descent on two points initially separated by $O(\delta \ve / \sqrt{d} L)$ cannot both get ``stuck'', at least one must escape the saddle point. They demonstrate convergence to a second-order stationary point in a remarkable $O\left(\frac{L(f(x_0) - f^*)}{\ve^2} \mathrm{polylog}(d/\delta) \right)$ time. In subsequent work,~\cite{jin2017accelerated} were able to show that Accelerated Gradient Descent improves this convergence to $\widetilde{O}\left(\frac{L^{1/2} \rho^{1/4}(f(x_0) - f^*)}{\ve^{7/4}}\right)$.
+
+Most importantly for us and the setting of Chapter~\ref{chap:fosp-eggroll}, ~\cite{ren2023escaping} introduce the first zeroth-order algorithm with Gaussian search directions, and linear speedup in population size $r$ when function evaluations are done in parallel, which converges to a second-order stationary point in time
+\begin{align*}
+    \widetilde{O}\left(\frac{d \max \set{L, L^2} \rho^2 (f(x_0)-f^*)}{\ve^{5/2} r}\right)
+\end{align*}
+Their paper provides a roadmap for the analysis subsequently carried out in Chapter~\ref{chap:fosp-eggroll}. However, the main technical lemma bounding the norm of the gradient estimator with high probability must be changed, which is where the majority of work in that chapter went to. While simply perturbing the algorithm in Chapter~\ref{chap:fosp-eggroll} could likely provide convegence to SOSP, we would prefe a zeroth-order algorithm with a sub-quadratic dependence on $\ve$. 
+
+\cite{carmon2018accelerated} propose an alternate approach than perturbing gradient descent. The basic idea is to accelerate when the function is almost convex, otherwise exploiting negative curvature. They design two subroutines, the first, called Almost-convex-AGD with convexity parameter $\gamma > 0$, which optimizes a function $h$ satisfying $\grad^2 h(x) \succeq -\gamma I$ using accelerated gradient descent repeatedly on $\gamma$-strongly convex surrogates of $h$. The second subroutine is negative-curvature descent. Using Hessian-vector products $\grad^2 f(x) v$, they apply Lanczos to find an approximately smallest eigenvector $v$. When $v^\top \grad^2 f(x) v \leq -\frac{\alpha}{2}$ where $\alpha$ is a curvature threshold, they take a step in the direction of 
+\begin{align*}
+    \frac{2|v^\top \grad^2 f(x) v|}{\rho} \mathrm{sgn}(v^\top \grad f(x)) v
+\end{align*}
+to decrease $f$ by at least $\alpha^3/12\rho^2$ (the sign is chosen so the linear term does not hurt this decrease). Thus this subroutine either guarantees objective progress or ensures the function is locally $\alpha$-almost convex. In the case where it is locally $\alpha$-almost convex, to ensure global almost-convexity, thereby allowing us to run the Almost-convex-AGD, they utilize the surrogate
+\begin{align*}
+    f_k(x) = f(x) + L\left[\mg{x-x_k} - \frac{\alpha}{\rho} \right]_{+}^2
+\end{align*}
+which has zero penalty within distance $\alpha/\rho$ of $x_k$ but ensures global $3\alpha$-almost convexity. Carefully choosing $\alpha \asymp \sqrt{\rho \ve}$, their algorithm returns a SOSP in time
+\begin{align*}
+    \widetilde{O}\left(\frac{(f(x_0) - f^*) L^{1/2} \rho^{1/4}}{\ve^{7/4}}\right)
+\end{align*}
+Unlike ~\cite{ren2023escaping}, they achieve a sub-quadratic convergence in $1/\ve$ to a second-order stationary point. The primary purpose of Chapter~\ref{chap:linear-mixing} is to provide the accelerated gradient descent subroutine needed to run almost-convex AGD in their paper.
