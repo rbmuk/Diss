@@ -26,7 +26,7 @@ While we have shown that parallelizing function evaluations to $r$ workers reduc
 
 \paragraph{Logarithmic Lower Bound on $r$.} In Chapter~\ref{chap:linear-mixing}, we assume a lower bound $r \geq \widetilde{O}(1)$. Significant work in \cite{ren2023escaping} and Chapter~\ref{chap:fosp-eggroll} went into removing this assumption. However, we expect it to be necessary for this zeroth-order linear coupling framework, due to the nature of restarting $z_0$ back to its original value every restart. In effect, $z_0$ and $x_0$ could drift permanently far apart, preventing us from establishing that gradients change by at most a factor of 4 over an interval of log-length, unlike Lemma~\ref{lem:half-two-gradient}. 
 
-\paragraph{$L$-Smoothness Assumption} All our results depend on an $L$-smoothness assumption. This is more general a Lipschitz assumption, which frequently does not hold for ML models, but it still requires gradients to not change too quickly in space. In the EGGROLL paper~\cite{sarkar2025evolution}, they assume only a local $\alpha$-Holder condition on gradients, which is more relaxed than $L$-smoothness. 
+\paragraph{$L$-Smoothness Assumption.} All our results depend on an $L$-smoothness assumption. This is more general a Lipschitz assumption, which frequently does not hold for ML models, but it still requires gradients to not change too quickly in space. In the EGGROLL paper~\cite{sarkar2025evolution}, they assume only a local $\alpha$-Holder condition on gradients, which is more relaxed than $L$-smoothness. 
 
 \section{Future Work}
 \paragraph{Experiments.}

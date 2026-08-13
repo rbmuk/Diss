@@ -8,7 +8,7 @@
 \newcommand{\dissertationtitle}{Zeroth-Order Optimization}
 \newcommand{\candidatenumber}{TODO}
 \newcommand{\submissionterm}{Trinity Term 2026}
-\newcommand{\degreename}{MSc in Advanced Computer Science}
+\newcommand{\degreename}{Master of Science in Advanced Computer Science}
 \newcommand{\dissertationwordcount}{TODO}
 
 % Keep the submitted PDF metadata anonymous as well as the visible title page.
@@ -29,30 +29,31 @@
 \raggedbottom
 \frontmatter
 \begin{titlepage}
+  \onehalfspacing
   \thispagestyle{empty}
   \centering
 
-  \vspace*{0.16\textheight}
 
   \begin{minipage}{0.9\textwidth}
     \centering
     {\Huge\bfseries \dissertationtitle\par}
   \end{minipage}
 
-  \vfill
-
-  {\Large \degreename\par}
-  \vspace{1.5cm}
-  {\large \submissionterm\par}
-
-  \vfill
+  \vspace{2.5cm}
+  \includegraphics[width=5cm]{beltcrest.pdf}\par
+  \vspace{2.5cm}
 
   \begin{tabular}{@{}rl@{}}
-    Candidate number: & \candidatenumber \\
-    Word count:       & \dissertationwordcount
+    \LARGE Candidate no.& \LARGE \candidatenumber \\
+    \Large Word count:& \Large \dissertationwordcount
   \end{tabular}
 
-  \vspace*{0.08\textheight}
+  \vspace{1cm}
+  {\Large Submitted in partial completion of the\\
+  \textit{\degreename}\par}
+  \vspace{1.5cm}
+  {\Large \submissionterm\par}
+
 \end{titlepage}
 
 \tableofcontents
