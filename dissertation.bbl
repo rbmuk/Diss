@@ -1,4 +1,4 @@
-\begin{thebibliography}{21}
+\begin{thebibliography}{10}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -12,39 +12,11 @@ Zeyuan Allen-Zhu and Lorenzo Orecchia.
 \newblock \doi{10.48550/arXiv.1407.1537}.
 \newblock URL \url{https://arxiv.org/abs/1407.1537}.
 
-\bibitem[Anandkumar and Ge(2016)]{anandkumar2016efficient}
-Animashree Anandkumar and Rong Ge.
-\newblock Efficient approaches for escaping higher order saddle points in non-convex optimization.
-\newblock In \emph{Proceedings of the 29th Annual Conference on Learning Theory}, volume~49 of \emph{Proceedings of Machine Learning Research}, pages 81--102. PMLR, 2016.
-\newblock URL \url{https://proceedings.mlr.press/v49/anandkumar16.html}.
-
-\bibitem[Attouch and L{\'a}szl{\'o}(2024)]{attouch2024convex}
-Hedy Attouch and Szil{\'a}rd~Csaba L{\'a}szl{\'o}.
-\newblock Convex optimization via inertial algorithms with vanishing tikhonov regularization: Fast convergence to the minimum norm solution.
-\newblock \emph{Mathematical Methods of Operations Research}, 99\penalty0 (3):\penalty0 307--347, 2024.
-\newblock \doi{10.1007/s00186-024-00867-y}.
-
 \bibitem[Carmon et~al.(2018)Carmon, Duchi, Hinder, and Sidford]{carmon2018accelerated}
 Yair Carmon, John~C. Duchi, Oliver Hinder, and Aaron Sidford.
 \newblock Accelerated methods for nonconvex optimization.
 \newblock \emph{SIAM Journal on Optimization}, 28\penalty0 (2):\penalty0 1751--1772, 2018.
 \newblock \doi{10.1137/17M1114296}.
-
-\bibitem[Devolder et~al.(2014)Devolder, Glineur, and Nesterov]{devolder2014first}
-Olivier Devolder, Fran{\c{c}}ois Glineur, and Yurii Nesterov.
-\newblock First-order methods of smooth convex optimization with inexact oracle.
-\newblock \emph{Mathematical Programming}, 146\penalty0 (1--2):\penalty0 37--75, 2014.
-\newblock \doi{10.1007/s10107-013-0677-5}.
-
-\bibitem[Ge et~al.(2015)Ge, Huang, Jin, and Yuan]{ge2015escaping}
-Rong Ge, Furong Huang, Chi Jin, and Yang Yuan.
-\newblock Escaping from saddle points---online stochastic gradient for tensor decomposition.
-\newblock In \emph{Proceedings of the 28th Conference on Learning Theory}, volume~40 of \emph{Proceedings of Machine Learning Research}, pages 797--842. PMLR, 2015.
-
-\bibitem[Hansen and Ostermeier(2001)]{hansen2001completely}
-Nikolaus Hansen and Andreas Ostermeier.
-\newblock Completely derandomized self-adaptation in evolution strategies.
-\newblock \emph{Evolutionary Computation}, 9\penalty0 (2):\penalty0 159--195, 2001.
 
 \bibitem[Jin et~al.(2017{\natexlab{a}})Jin, Ge, Netrapalli, Kakade, and Jordan]{jin2017escape}
 Chi Jin, Rong Ge, Praneeth Netrapalli, Sham~M. Kakade, and Michael~I. Jordan.
@@ -59,58 +31,27 @@ Chi Jin, Praneeth Netrapalli, and Michael~I. Jordan.
 \newblock \doi{10.48550/arXiv.1711.10456}.
 \newblock URL \url{https://arxiv.org/abs/1711.10456}.
 
-\bibitem[Jin et~al.(2021)Jin, Netrapalli, Ge, Kakade, and Jordan]{10.1145/3418526}
-Chi Jin, Praneeth Netrapalli, Rong Ge, Sham~M. Kakade, and Michael~I. Jordan.
-\newblock On nonconvex optimization for machine learning: Gradients, stochasticity, and saddle points.
-\newblock \emph{J. ACM}, 68\penalty0 (2), February 2021.
-\newblock ISSN 0004-5411.
-\newblock \doi{10.1145/3418526}.
-\newblock URL \url{https://doi.org/10.1145/3418526}.
+\bibitem[Li et~al.(2022)Li, Liu, and Orabona]{li2022last}
+Xiaoyu Li, Mingrui Liu, and Francesco Orabona.
+\newblock On the last iterate convergence of momentum methods.
+\newblock In \emph{Proceedings of the 33rd International Conference on Algorithmic Learning Theory}, volume 167 of \emph{Proceedings of Machine Learning Research}, pages 699--717. PMLR, 2022.
 
-\bibitem[Nesterov and Polyak(2006)]{nesterov2006cubic}
-Yurii Nesterov and Boris~T. Polyak.
-\newblock Cubic regularization of newton method and its global performance.
-\newblock \emph{Mathematical Programming}, 108\penalty0 (1):\penalty0 177--205, 2006.
-\newblock \doi{10.1007/s10107-006-0706-8}.
+\bibitem[Liu et~al.(2020)Liu, Li, and Qian]{liu2020selfguided}
+Fei-Yu Liu, Zi-Niu Li, and Chao Qian.
+\newblock Self-guided evolution strategies with historical estimated gradients.
+\newblock In \emph{Proceedings of the Twenty-Ninth International Joint Conference on Artificial Intelligence}, pages 1474--1480, 2020.
+\newblock \doi{10.24963/ijcai.2020/205}.
 
-\bibitem[Nesterov and Spokoiny(2017)]{nesterov2017random}
-Yurii Nesterov and Vladimir Spokoiny.
-\newblock Random gradient-free minimization of convex functions.
-\newblock \emph{Foundations of Computational Mathematics}, 17\penalty0 (2):\penalty0 527--566, 2017.
-\newblock \doi{10.1007/s10208-015-9296-2}.
-
-\bibitem[Nesterov(1983)]{nesterov1983method}
-Yurii~E. Nesterov.
-\newblock A method for solving the convex programming problem with convergence rate $o(1/k^2)$.
-\newblock \emph{Soviet Mathematics Doklady}, 27\penalty0 (2):\penalty0 372--376, 1983.
-
-\bibitem[Polyak(1964)]{polyak1964some}
-Boris~T. Polyak.
-\newblock Some methods of speeding up the convergence of iteration methods.
-\newblock \emph{USSR Computational Mathematics and Mathematical Physics}, 4\penalty0 (5):\penalty0 1--17, 1964.
-\newblock \doi{10.1016/0041-5553(64)90137-5}.
-
-\bibitem[Rechenberg(1965)]{rechenberg1965cybernetic}
-Ingo Rechenberg.
-\newblock Cybernetic solution path of an experimental problem.
-\newblock Technical Report Library Translation 1122, Royal Aircraft Establishment, Farnborough, UK, 1965.
-\newblock Translated by B. F. Toms.
-
-\bibitem[Rechenberg(1973)]{rechenberg1973evolutionsstrategie}
-Ingo Rechenberg.
-\newblock \emph{Evolutionsstrategie: Optimierung technischer Systeme nach Prinzipien der biologischen Evolution}.
-\newblock Frommann-Holzboog, Stuttgart, 1973.
+\bibitem[Meier et~al.(2019)Meier, Mujika, Gauy, and Steger]{meier2019improving}
+Florian Meier, Asier Mujika, Marcelo~Matheus Gauy, and Angelika Steger.
+\newblock Improving gradient estimation in evolutionary strategies with past descent directions.
+\newblock \emph{arXiv preprint arXiv:1910.05268}, 2019.
 
 \bibitem[Ren et~al.(2023)Ren, Tang, and Li]{ren2023escaping}
 Zhaolin Ren, Yujie Tang, and Na~Li.
 \newblock Escaping saddle points in zeroth-order optimization: The power of two-point estimators.
 \newblock In \emph{Proceedings of the 40th International Conference on Machine Learning}, 2023.
 \newblock URL \url{https://arxiv.org/abs/2209.13555}.
-
-\bibitem[Salimans et~al.(2017)Salimans, Ho, Chen, Sidor, and Sutskever]{salimans2017evolution}
-Tim Salimans, Jonathan Ho, Xi~Chen, Szymon Sidor, and Ilya Sutskever.
-\newblock Evolution strategies as a scalable alternative to reinforcement learning.
-\newblock \emph{arXiv preprint arXiv:1703.03864}, 2017.
 
 \bibitem[Sarkar et~al.(2025)Sarkar, Fellows, Duque, Letcher, Villares, Sims, Wibault, Samsonov, Cope, Liesen, Li, Seier, Wolf, Berdica, Mohl, Goldie, Courville, Sevegnani, Whiteson, and Foerster]{sarkar2025evolution}
 Bidipta Sarkar, Mattie Fellows, Juan~Agustin Duque, Alistair Letcher, Antonio~Le{\'o}n Villares, Anya Sims, Clarisse Wibault, Dmitry Samsonov, Dylan Cope, Jarek Liesen, Kang Li, Lukas Seier, Theo Wolf, Uljad Berdica, Valentin Mohl, Alexander~David Goldie, Aaron Courville, Karin Sevegnani, Shimon Whiteson, and Jakob~Nicolaus Foerster.
@@ -119,15 +60,10 @@ Bidipta Sarkar, Mattie Fellows, Juan~Agustin Duque, Alistair Letcher, Antonio~Le
 \newblock \doi{10.48550/arXiv.2511.16652}.
 \newblock URL \url{https://arxiv.org/abs/2511.16652}.
 
-\bibitem[Su et~al.(2016)Su, Boyd, and Cand{\`e}s]{su2016differential}
-Weijie Su, Stephen Boyd, and Emmanuel~J. Cand{\`e}s.
-\newblock A differential equation for modeling nesterov's accelerated gradient method: Theory and insights.
-\newblock \emph{Journal of Machine Learning Research}, 17\penalty0 (153):\penalty0 1--43, 2016.
-\newblock URL \url{https://www.jmlr.org/papers/v17/15-084.html}.
-
-\bibitem[Wierstra et~al.(2014)Wierstra, Schaul, Glasmachers, Sun, Peters, and Schmidhuber]{wierstra2014natural}
-Daan Wierstra, Tom Schaul, Tobias Glasmachers, Yi~Sun, Jan Peters, and J{\"u}rgen Schmidhuber.
-\newblock Natural evolution strategies.
-\newblock \emph{Journal of Machine Learning Research}, 15\penalty0 (27):\penalty0 949--980, 2014.
+\bibitem[Seung et~al.(2026)Seung, Lee, and Ko]{seung2026lowrank}
+Hyunseok Seung, Jaewoo Lee, and Hyunsuk Ko.
+\newblock Low-rank curvature for zeroth-order optimization in {LLM} fine-tuning.
+\newblock In \emph{Proceedings of the AAAI Conference on Artificial Intelligence}, volume~40, pages 25235--25242, 2026.
+\newblock \doi{10.1609/aaai.v40i30.39715}.
 
 \end{thebibliography}
