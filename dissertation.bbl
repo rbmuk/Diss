@@ -1,4 +1,4 @@
-\begin{thebibliography}{31}
+\begin{thebibliography}{38}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -10,6 +10,12 @@ Amir~Ali Ahmadi, Alex Olshevsky, Pablo~A. Parrilo, and John~N. Tsitsiklis.
 \newblock Np-hardness of deciding convexity of quartic polynomials and related problems.
 \newblock \emph{Mathematical Programming}, 137\penalty0 (1--2):\penalty0 453--476, 2013.
 \newblock \doi{10.1007/s10107-011-0499-2}.
+
+\bibitem[Alarie et~al.(2021)Alarie, Audet, Gheribi, Kokkolaras, and Le~Digabel]{alarie2021blackbox}
+St{\'e}phane Alarie, Charles Audet, A{\"i}men~E. Gheribi, Michael Kokkolaras, and S{\'e}bastien Le~Digabel.
+\newblock Two decades of blackbox optimization applications.
+\newblock \emph{EURO Journal on Computational Optimization}, 9:\penalty0 100011, 2021.
+\newblock \doi{10.1016/j.ejco.2021.100011}.
 
 \bibitem[Allen-Zhu and Orecchia(2016)]{allenZhu2016linear}
 Zeyuan Allen-Zhu and Lorenzo Orecchia.
@@ -35,11 +41,29 @@ Krishnakumar Balasubramanian and Saeed Ghadimi.
 \newblock Zeroth-order (non)-convex stochastic optimization via conditional gradient and gradient updates.
 \newblock In \emph{Advances in Neural Information Processing Systems}, volume~31, 2018.
 
+\bibitem[Bergstra and Bengio(2012)]{bergstra2012random}
+James Bergstra and Yoshua Bengio.
+\newblock Random search for hyper-parameter optimization.
+\newblock \emph{Journal of Machine Learning Research}, 13:\penalty0 281--305, 2012.
+\newblock URL \url{https://jmlr.org/papers/v13/bergstra12a.html}.
+
 \bibitem[Carmon et~al.(2018)Carmon, Duchi, Hinder, and Sidford]{carmon2018accelerated}
 Yair Carmon, John~C. Duchi, Oliver Hinder, and Aaron Sidford.
 \newblock Accelerated methods for nonconvex optimization.
 \newblock \emph{SIAM Journal on Optimization}, 28\penalty0 (2):\penalty0 1751--1772, 2018.
 \newblock \doi{10.1137/17M1114296}.
+
+\bibitem[Chen et~al.(2017)Chen, Zhang, Sharma, Yi, and Hsieh]{chen2017zoo}
+Pin-Yu Chen, Huan Zhang, Yash Sharma, Jinfeng Yi, and Cho-Jui Hsieh.
+\newblock {ZOO}: Zeroth order optimization based black-box attacks to deep neural networks without training substitute models.
+\newblock In \emph{Proceedings of the 10th ACM Workshop on Artificial Intelligence and Security}, pages 15--26. Association for Computing Machinery, 2017.
+\newblock \doi{10.1145/3128572.3140448}.
+
+\bibitem[Cully et~al.(2015)Cully, Clune, Tarapore, and Mouret]{cully2015robots}
+Antoine Cully, Jeff Clune, Danesh Tarapore, and Jean-Baptiste Mouret.
+\newblock Robots that can adapt like animals.
+\newblock \emph{Nature}, 521\penalty0 (7553):\penalty0 503--507, 2015.
+\newblock \doi{10.1038/nature14422}.
 
 \bibitem[Devolder et~al.(2014)Devolder, Glineur, and Nesterov]{devolder2014first}
 Olivier Devolder, Fran{\c{c}}ois Glineur, and Yurii Nesterov.
@@ -57,6 +81,12 @@ Saeed Ghadimi and Guanghui Lan.
 \newblock Stochastic first- and zeroth-order methods for nonconvex stochastic programming.
 \newblock \emph{arXiv preprint arXiv:1309.5549}, 2013.
 \newblock URL \url{https://arxiv.org/abs/1309.5549}.
+
+\bibitem[G{\'o}mez-Bombarelli et~al.(2018)G{\'o}mez-Bombarelli, Wei, Duvenaud, Hern{\'a}ndez-Lobato, S{\'a}nchez-Lengeling, Sheberla, Aguilera-Iparraguirre, Hirzel, Adams, and Aspuru-Guzik]{gomez2018automatic}
+Rafael G{\'o}mez-Bombarelli, Jennifer~N. Wei, David Duvenaud, Jos{\'e}~Miguel Hern{\'a}ndez-Lobato, Benjam{\'i}n S{\'a}nchez-Lengeling, Dennis Sheberla, Jorge Aguilera-Iparraguirre, Timothy~D. Hirzel, Ryan~P. Adams, and Al{\'a}n Aspuru-Guzik.
+\newblock Automatic chemical design using a data-driven continuous representation of molecules.
+\newblock \emph{ACS Central Science}, 4\penalty0 (2):\penalty0 268--276, 2018.
+\newblock \doi{10.1021/acscentsci.7b00572}.
 
 \bibitem[Hansen and Ostermeier(2001)]{hansen2001completely}
 Nikolaus Hansen and Andreas Ostermeier.
@@ -95,6 +125,11 @@ B{\'e}atrice Laurent and Pascal Massart.
 \newblock Adaptive estimation of a quadratic functional by model selection.
 \newblock \emph{The Annals of Statistics}, 28\penalty0 (5):\penalty0 1302--1338, 2000.
 \newblock \doi{10.1214/aos/1015957395}.
+
+\bibitem[Lehner(1997)]{lehner1997pyramids}
+Mark Lehner.
+\newblock \emph{The Complete Pyramids: Solving the Ancient Mysteries}.
+\newblock Thames and Hudson, London, 1997.
 
 \bibitem[Li et~al.(2022)Li, Liu, and Orabona]{li2022last}
 Xiaoyu Li, Mingrui Liu, and Francesco Orabona.
@@ -169,6 +204,12 @@ Hyunseok Seung, Jaewoo Lee, and Hyunsuk Ko.
 \newblock Low-rank curvature for zeroth-order optimization in {LLM} fine-tuning.
 \newblock In \emph{Proceedings of the AAAI Conference on Artificial Intelligence}, volume~40, pages 25235--25242, 2026.
 \newblock \doi{10.1609/aaai.v40i30.39715}.
+
+\bibitem[Shahriari et~al.(2016)Shahriari, Swersky, Wang, Adams, and de~Freitas]{shahriari2016human}
+Bobak Shahriari, Kevin Swersky, Ziyu Wang, Ryan~P. Adams, and Nando de~Freitas.
+\newblock Taking the human out of the loop: A review of bayesian optimization.
+\newblock \emph{Proceedings of the IEEE}, 104\penalty0 (1):\penalty0 148--175, 2016.
+\newblock \doi{10.1109/JPROC.2015.2494218}.
 
 \bibitem[Su et~al.(2016)Su, Boyd, and Cand{\`e}s]{su2016differential}
 Weijie Su, Stephen Boyd, and Emmanuel~J. Cand{\`e}s.
