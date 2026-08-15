@@ -6,7 +6,7 @@ In this chapter we provide some background in optimization, list the standard as
 \section{Optimization}
 The perfect optimization algorithm would take a function $f: \R^d \to \R$ and output a point $x^* \in \R^d$ satisfying
 \begin{align*}
-    x^* \in \mathrm{argmin}_{x \in \R^d} f(x)
+    x^* \in \operatorname*{argmin}_{x \in \R^d} f(x)
 \end{align*}
 However, since deciding whether a quartic polynomial $p(x_1, \ldots, x_d) \in \R[x_1, \ldots, x_d]$ is globally non-negative,
 \begin{align*}
@@ -82,7 +82,7 @@ By using the $L$-smoothness assumption, gradient descent converges to a first-or
 \section{Zero-Order Oracles}
 The focus of this work will be on zero-order optimization algorithms. Simply put, we drop the assumption that we can access gradients $\grad f(x)$. We can only evaluate the function (``oracle'') at points of our choosing $x \in \R^d, \; f(x)$. The simplest thing to do now is to calculate
 \begin{align*}
-    \widetilde \grad f(x) = \sum_{i=1}^d \frac{f(x+\sigma e_i) - f(x-\sigma e_i)}{2 \sigma} e_i 
+    \widetilde{\grad} f(x) = \sum_{i=1}^d \frac{f(x+\sigma e_i) - f(x-\sigma e_i)}{2 \sigma} e_i 
 \end{align*}
 for any orthonormal basis $\set{e_1, \ldots, e_d}$ of $\R^d$. We have
 \begin{align*}
@@ -93,7 +93,7 @@ This is a simple approach applied successfully, but is often of little practical
 For a quadratic $f(x) = \frac 12 x^\top H x$ with symmetric $H$, 
 \begin{align*}
     \grad f(x) = Hx = \begin{bmatrix}
-        \frac{f(x+e_1) - f(x-e_1)}{2} & \cdots &  \frac{f(x+e_d) - f (x-e_d)}{2}
+        \frac{f(x+e_1) - f(x-e_1)}{2} & \cdots & \frac{f(x+e_d) - f(x-e_d)}{2}
     \end{bmatrix}^\top
 \end{align*}
 Thus typically the gradient gives $d$ times more information than any single forward pass $f(x+e_i)$. This suggests that any zero-order optimization algorithm for convergence to a first-order stationary point for general nonconvex $f$ should take $d$ times more queries in the worst case. To the best of our knowledge this lower bound is currently open. Nevertheless, we are unaware of any method in the literature achieving a sublinear $d$ dependence for this problem.
@@ -105,7 +105,7 @@ Another way to use the oracle $f$ is to query random perturbations. For a random
 \end{align}
 In the sequel, this is the only estimator for the gradient we use. Upon defining the gaussian density 
 \begin{align*}
-    \cph_\sigma(z) = \frac{1}{(2\pi \sigma^2)^{d/2}} \exp(-\frac{\mg{z}^2}{2})
+    \cph_\sigma(z) = \frac{1}{(2\pi \sigma^2)^{d/2}} \exp\left(-\frac{\mg{z}^2}{2\sigma^2}\right)
 \end{align*}
 and the Gaussian smoothed objective
 \begin{align*}
@@ -117,23 +117,23 @@ under standard integrability assumptions
 \end{align*}
 which by symmetry of the Gaussian distribution yields,
 \begin{align*}
-    \grad f_\sigma(x) = \mbb E[\widetilde \grad f(x)]
+    \grad f_\sigma(x) = \mbb E[\widetilde{\grad} f(x)]
 \end{align*}
-The advantage behind the central-difference version $\widetilde \grad f(x)$ and $\frac{1}{\sigma} f(x+\sigma p)p$ is that the first has good cancellation properties under a Taylor expansion
+The advantage behind the central-difference version $\widetilde{\grad} f(x)$ and $\frac{1}{\sigma} f(x+\sigma p)p$ is that the first has good cancellation properties under a Taylor expansion
 \begin{align*}
     f(x+\sigma p) - f(x-\sigma p) = 2\sigma \langle \grad f(x), p \rangle + O(\mg{\sigma p}^3).
 \end{align*}
 Since $\E[\widetilde{\grad} f(x)] = \grad f_\sigma(x)$, the bias of the estimator is precisely the error introduced by Gaussian smoothing. The high-dimensional analysis of this bias was investigated in~\cite{sarkar2025evolution}, where they proved 
 \begin{align*}
-    |\E[\widetilde{\grad} f(x)] - \grad f(x)| = O_d(L \sigma \sqrt{d})
+    \mg{\E[\widetilde{\grad} f(x)] - \grad f(x)} = O_d(L \sigma \sqrt{d})
 \end{align*}
 Thus choosing $\sigma = o(d^{-1/2})$ ensures this bias vanishes at infinity. The intuition is that $f$ linearizes in high dimensions.
 \section{The Low-Rank Trick}
-In an ML model $\Phi_\theta(x)$, the parameters $\theta \in \R^{d \times m}$ are naturally thought of not as vectors but as matrices. While helpful that the estimator~\ref{eq:estimator} lets us evaluate at only $r$ perturbations per iteration rather than the full $d \times m$, since $p \in \R^{d \times m}$ has all Gaussian entries, every entry is non-zero almost surely. Thus evaluating $\Phi_{\theta + p}(x)$ is still slow as we need to first add the two matrices $\theta + p$ before evaluating, with memory $O(rd)$ just to store the perturbations.
+In an ML model $\Phi_\theta(x)$, the parameters $\theta \in \R^{d \times m}$ are naturally thought of not as vectors but as matrices. While helpful that the estimator~\eqref{eq:estimator} lets us evaluate at only $r$ perturbations per iteration rather than the full $d \times m$, since $p \in \R^{d \times m}$ has all Gaussian entries, every entry is non-zero almost surely. Thus evaluating $\Phi_{\theta + \sigma p}(x)$ is still slow as we need to first add the two matrices $\theta + \sigma p$ before evaluating, with memory $O(rdm)$ just to store the perturbations.
 
-The low rank trick, introduced in~\cite{sarkar2025evolution}, is to sample $a \sim \mathcal N(0,I_d)$, $b \sim \mathcal N(0, I_m)$, and exploit $(\theta + ab^\top)x = \theta x + a(b^\top x)$. This reduces the memory to $O(r(d+m))$, which makes zero-order algorithms practical.
+The low rank trick, introduced in~\cite{sarkar2025evolution}, is to sample $a \sim \mathcal N(0,I_d)$, $b \sim \mathcal N(0, I_m)$, and exploit $(\theta + \sigma ab^\top)x = \theta x + \sigma a(b^\top x)$. This reduces the memory to $O(r(d+m))$, which makes zero-order algorithms practical.
 
-However, for independent gaussian $Z,W \sim \mathcal N(0,1)$, the product $ZW$ is no longer subgaussian, it is sub-exponential, meaning it has fat tails. This could, \textit{a priori}, ruin the convergence of the algorithm, as $\E[\|\widetilde \grad f(x)\|^2]$ could grow too large. This is the central question of Chapter~\ref{chap:fosp-eggroll}. To heed our analysis, for $A,B \in \R^{d \times m}$, we define the Frobenius inner product and the Frobenius norm,
+However, for independent gaussian $Z,W \sim \mathcal N(0,1)$, the product $ZW$ is no longer subgaussian, it is sub-exponential, meaning it has fat tails. This could, \textit{a priori}, ruin the convergence of the algorithm, as $\E[\|\widetilde{\grad} f(x)\|^2]$ could grow too large. This is the central question of Chapter~\ref{chap:fosp-eggroll}. To heed our analysis, for $A,B \in \R^{d \times m}$, we define the Frobenius inner product and the Frobenius norm,
 \begin{align*}
     \langle A, B \rangle_F = \Tr(AB^\top) = \sum_{i,j} A_{i,j} B_{i,j}, \quad \mg{A}_F = \sqrt{\sum_{i,j} A_{i,j}^2}
 \end{align*}
@@ -141,7 +141,7 @@ We define $L$-smoothness in the same way as before using this norm.
 
 The Gaussian distribution is rotationally invariant, meaning for $p \sim \mathcal N(0,I)$, for any rotation matrix $R$ satisfying $RR^\top = R^\top R = I$, we have $Rp \sim \mathcal N(0,I)$. Thus, we search all directions uniformly. However, $ab^\top$ does not have this property, as it is rank 1, we could design a rotation matrix which rotates it into $M$ which is full rank. This raises the question, is rotational invariance necessary? What if we miss the direction of the gradient?
 \begin{definition}
-    The random variable $X \in \R^d$ is isotropic if
+    The random vector $X \in \R^d$ is isotropic if
     \begin{align*}
         \E[XX^\top] = I
     \end{align*}
@@ -160,7 +160,7 @@ While $ab^\top$ is not rotationally invariant, it is isotropic:
 \begin{proof}
     We have
     \begin{align*}
-        \E[\langle ab^\top, U \rangle_F^2] = \E[\Tr(U b a^\top)^2]
+        \E[\langle ab^\top, U \rangle_F^2] = \E[(\Tr(U b a^\top))^2]
     \end{align*}
     By cyclic property of trace, we know that $\Tr(ABC)=\Tr(CAB)$, so the above equals
     \begin{align*}
@@ -180,18 +180,18 @@ It will turn out that isotropy is exactly the condition we need for convergence 
 \section{Probability Tools}
 Here we give a short background on measure-theoretic probability. We define a $\sigma$-algebra
 \begin{definition}
-    For a state space $\Omega$, $\mathcal F \subset 2^X$ is a $\sigma$-algebra if:
+    For a state space $\Omega$, $\mathcal F \subset 2^\Omega$ is a $\sigma$-algebra if:
     \begin{enumerate}[nosep]
         \item $\Omega \in \mathcal F$
         \item $\mathcal F$ is closed under complements: if $A \in \mathcal F$, then $A^c \in \mathcal F$
-        \item $\mathcal F$ is closed under countable unions: if $A_1, A_2, \ldots, \in \mathcal F$, then $A = A_1 \cup A_2 \cup \cdots \in \mathcal F$. 
+        \item $\mathcal F$ is closed under countable unions: if $A_1, A_2, \ldots \in \mathcal F$, then $A = A_1 \cup A_2 \cup \cdots \in \mathcal F$. 
     \end{enumerate}
 \end{definition}
 By combining the last two properties $\mathcal F$ is also closed under countable intersections. $\mathcal F$ is the collection of \textit{measurable sets}, or in probability, \textit{events}. 
 \begin{definition}
     $\mbb P: \mathcal F \to [0,1]$ is a probability measure if $\P(\emptyset) = 0$, $\P(\Omega) = 1$, and
     \begin{align*}
-        \P(\bigcup_{i=0}^{\infty} E_i) = \sum_{i=0}^{\infty} E_i
+        \P(\bigcup_{i=0}^{\infty} E_i) = \sum_{i=0}^{\infty} \P(E_i)
     \end{align*}
 \end{definition}
 The collection $(\Omega, \mathcal F, \mbb P)$ is called a probability space. 
@@ -207,7 +207,7 @@ For Chapters~\ref{chap:zo-mirror-descent} and~\ref{chap:linear-mixing}, at each 
 \begin{definition}
     The zero-order filtration $\set{\mathcal F_t}_{t=0}^\infty$ is defined as
     \begin{align*}
-        \mathcal F_t
+        \mathcal F_{t-1}
     =
     \sigma\left(
         x_0,\ldots,x_t,
@@ -247,7 +247,7 @@ Using $a_i \leq X_i \leq b_i$, $\Var(X_i) = \E[(X_i-\E(X_i))^2] \leq (b_i-a_i)^2
 
 However, this property is not limited to just $a_i \leq X_i \leq b_i$. It carries over to martingale difference sequences. 
 \begin{definition}[Martingale Difference Sequence]
-    $\set{\xi_t}_{t\geq 1}$ is a martingale difference sequence wrt filtration $\mathcal F_t$ if $\xi_t \in \mathcal F_t$ and 
+    $\set{\xi_t}_{t\geq 1}$ is a martingale difference sequence wrt filtration $\mathcal F_t$ if $\xi_t$ is $\mathcal F_t$-measurable and 
     \begin{align*}
         \E[\xi_t \mid \mathcal F_{t-1}] = 0
     \end{align*}
@@ -262,11 +262,11 @@ The main intuition is that in a martingale difference sequence, the variance of 
 \begin{proof}
     We have
     \begin{align*}
-        \E[M_T^2] = \sum \E[\xi_t^2] + 2\E[\sum_{i < j} \xi_i \xi_j]
+        \E[S_T^2] = \sum_{t=1}^T \E[\xi_t^2] + 2\E[\sum_{i < j} \xi_i \xi_j]
     \end{align*}
     Now,
     \begin{align*}
-        \E[\sum_{i < j} \xi_i \xi_j] = \sum_{i < j} \E[\E[\xi_i \xi_j \given \mathcal F_i]] = \sum_{i < j} \E[\xi_i \E[ \xi_j \given \mathcal F_i]] = 0.
+        \E[\sum_{i < j} \xi_i \xi_j] = \sum_{i < j} \E[\E[\xi_i \xi_j \given \mathcal F_{j-1}]] = \sum_{i < j} \E[\xi_i \E[ \xi_j \given \mathcal F_{j-1}]] = 0.
     \end{align*}
 \end{proof}
 
@@ -297,4 +297,4 @@ Under this definition $\mathcal N(0,1)$ is 1-subgaussian (the constant 3 is not 
 Convergence of stochastic gradient methods are standard in the literature, see for example~\cite{ghadimi2013stochastic,nesterov2017random,balasubramanian2018zeroth}. Concentration inequalities will allow us to upgrade that convergence in expectation to convergence guarantees that hold with high probability.
 
 \section{Notation}
-$d$ and $m$ will always be dimension constants, $r$ will always be the population size, $T$ will always be the iteration horizon, $L$ will always be the smoothness constant, $\sigma$ will always be the smoothing radius, $\ve$ will always be the desired accuracy, and $\delta$ will always be the failure probability. We use $O(\cdot), \Omega(\cdot)$, and $\Theta(\cdot)$ in the standard sense. The notation $\widetilde O(\cdot)$ hides polylogarithmic factors in the problem parameters, including $d$, $L$, $T$, $f(x_0)-f^*$, $\ve$ and failure probability $\delta$. Throughout the sequel, $\chi$ always denotes a polylogarithmic factor. 
+$d$ and $m$ will always be dimension constants, $r$ will always be the population size, $T$ will always be the iteration horizon, $L$ will always be the smoothness constant, $\sigma$ will always be the smoothing radius, $\ve$ will always be the desired accuracy, and $\delta$ will always be the failure probability. We use $O(\cdot), \Omega(\cdot)$, and $\Theta(\cdot)$ in the standard sense. The notation $\widetilde O(\cdot)$ hides polylogarithmic factors in the problem parameters, including $d$, $L$, $T$, $f(x_0)-f^*$, $\ve$ and failure probability $\delta$. Throughout the sequel, $\chi$ always denotes a polylogarithmic factor.

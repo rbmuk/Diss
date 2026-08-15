@@ -7,7 +7,7 @@
 
 \bibitem[Ahmadi et~al.(2013)Ahmadi, Olshevsky, Parrilo, and Tsitsiklis]{ahmadi2013nphardness}
 Amir~Ali Ahmadi, Alex Olshevsky, Pablo~A. Parrilo, and John~N. Tsitsiklis.
-\newblock Np-hardness of deciding convexity of quartic polynomials and related problems.
+\newblock {NP}-hardness of deciding convexity of quartic polynomials and related problems.
 \newblock \emph{Mathematical Programming}, 137\penalty0 (1--2):\penalty0 453--476, 2013.
 \newblock \doi{10.1007/s10107-011-0499-2}.
 
@@ -32,7 +32,7 @@ Animashree Anandkumar and Rong Ge.
 
 \bibitem[Attouch and L{\'a}szl{\'o}(2024)]{attouch2024convex}
 Hedy Attouch and Szil{\'a}rd~Csaba L{\'a}szl{\'o}.
-\newblock Convex optimization via inertial algorithms with vanishing tikhonov regularization: Fast convergence to the minimum norm solution.
+\newblock Convex optimization via inertial algorithms with vanishing {Tikhonov} regularization: Fast convergence to the minimum norm solution.
 \newblock \emph{Mathematical Methods of Operations Research}, 99\penalty0 (3):\penalty0 307--347, 2024.
 \newblock \doi{10.1007/s00186-024-00867-y}.
 
@@ -108,7 +108,7 @@ Chi Jin, Praneeth Netrapalli, and Michael~I. Jordan.
 
 \bibitem[Jin et~al.(2019)Jin, Netrapalli, Ge, Kakade, and Jordan]{jin2019short}
 Chi Jin, Praneeth Netrapalli, Rong Ge, Sham~M. Kakade, and Michael~I. Jordan.
-\newblock A short note on concentration inequalities for random vectors with subgaussian norm.
+\newblock A short note on concentration inequalities for random vectors with {SubGaussian} norm.
 \newblock \emph{arXiv preprint arXiv:1902.03736}, 2019.
 \newblock URL \url{https://arxiv.org/abs/1902.03736}.
 
@@ -149,7 +149,7 @@ Florian Meier, Asier Mujika, Marcelo~Matheus Gauy, and Angelika Steger.
 
 \bibitem[Nesterov and Polyak(2006)]{nesterov2006cubic}
 Yurii Nesterov and Boris~T. Polyak.
-\newblock Cubic regularization of newton method and its global performance.
+\newblock Cubic regularization of {Newton} method and its global performance.
 \newblock \emph{Mathematical Programming}, 108\penalty0 (1):\penalty0 177--205, 2006.
 \newblock \doi{10.1007/s10107-006-0706-8}.
 
@@ -161,7 +161,7 @@ Yurii Nesterov and Vladimir Spokoiny.
 
 \bibitem[Nesterov(1983)]{nesterov1983method}
 Yurii~E. Nesterov.
-\newblock A method for solving the convex programming problem with convergence rate $o(1/k^2)$.
+\newblock A method for solving the convex programming problem with convergence rate {$O(1/k^2)$}.
 \newblock \emph{Soviet Mathematics Doklady}, 27\penalty0 (2):\penalty0 372--376, 1983.
 
 \bibitem[Polyak(1964)]{polyak1964some}
@@ -207,13 +207,13 @@ Hyunseok Seung, Jaewoo Lee, and Hyunsuk Ko.
 
 \bibitem[Shahriari et~al.(2016)Shahriari, Swersky, Wang, Adams, and de~Freitas]{shahriari2016human}
 Bobak Shahriari, Kevin Swersky, Ziyu Wang, Ryan~P. Adams, and Nando de~Freitas.
-\newblock Taking the human out of the loop: A review of bayesian optimization.
+\newblock Taking the human out of the loop: A review of {Bayesian} optimization.
 \newblock \emph{Proceedings of the IEEE}, 104\penalty0 (1):\penalty0 148--175, 2016.
 \newblock \doi{10.1109/JPROC.2015.2494218}.
 
 \bibitem[Su et~al.(2016)Su, Boyd, and Cand{\`e}s]{su2016differential}
 Weijie Su, Stephen Boyd, and Emmanuel~J. Cand{\`e}s.
-\newblock A differential equation for modeling nesterov's accelerated gradient method: Theory and insights.
+\newblock A differential equation for modeling {Nesterov's} accelerated gradient method: Theory and insights.
 \newblock \emph{Journal of Machine Learning Research}, 17\penalty0 (153):\penalty0 1--43, 2016.
 \newblock URL \url{https://www.jmlr.org/papers/v17/15-084.html}.
 

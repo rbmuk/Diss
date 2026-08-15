@@ -10,7 +10,7 @@
     Thus, for some points $\set{x_t}_{t=0}^{T-1}$, we have
     \begin{align}
         \label{eq:bounded-by-regret}
-        f(u) \geq \frac 1T \sum_{t=0}^{T-1} f(x_t) + \frac{1}{T} \sum_{t=0}^{T-1} \langle \grad f(x_t), u - x \rangle
+        f(u) \geq \frac 1T \sum_{t=0}^{T-1} f(x_t) + \frac{1}{T} \sum_{t=0}^{T-1} \langle \grad f(x_t), u - x_t \rangle
     \end{align}
     Defining $\overline x = \frac{1}{T} \sum_{t=0}^{T-1} x_t$, convexity yields $f(\overline x) \leq \frac{1}{T} \sum_{t=0}^{T-1} f(x_t)$, and combining this with the above yields,
     \begin{align*}
@@ -20,16 +20,16 @@
     \begin{align*}
         \widetilde R_T(u) = \frac{1}{T} \left(-\frac{w(u)}{\alpha} + \sum_{t=0}^{T-1} \langle \grad f(x_t), x_t - u \rangle \right)
     \end{align*}
-    where $\alpha > 0$ is a trade-off parameter and $w(u)$ is a strongly convex regularizer. By taking the updates $x_t = \mathrm{argmax}_u \widetilde R_T(u)$, we will tune $\alpha$ to show that Mirror descent converges in $T=O(\rho^2 / \ve^2)$ iterations where $\rho^2$ is the average value of $\mg{\grad f(x_t)}^2$ across iterations. This is because intuitively, the upper bound (\ref{eq:bounded-by-regret}) becomes better when $\frac{1}{T} \sum_{t=0}^{T-1} \mg{\grad f(x_t)}^2$ is small. 
+    where $\alpha > 0$ is a trade-off parameter and $w(u)$ is a strongly convex regularizer. By taking the updates $x_t = \mathrm{argmax}_u \widetilde R_T(u)$, we will tune $\alpha$ to show that Mirror descent converges in $T=O(\rho^2 / \ve^2)$ iterations where $\rho^2$ is the average value of $\mg{\grad f(x_t)}^2$ across iterations. This is because intuitively, the upper bound~\eqref{eq:bounded-by-regret} becomes better when $\frac{1}{T} \sum_{t=0}^{T-1} \mg{\grad f(x_t)}^2$ is small. 
 
     \begin{assumption}
         $f$ is $\rho$-Lipschitz continuous and convex over a closed convex set $Q \subset \R^d$.
     \end{assumption}
 
     \begin{definition}
-        $w: Q \to \R^d$ is a DGF if it is 1-strongly convex w.r.t. $\mg{\cdot}$, in symbols, $w(y) \geq w(x) + \langle \grad w(x), y-x \rangle + \frac 12 \mg{y-x}^2$. The Bregman divergence is defined
+        $w: Q \to \R$ is a DGF if it is 1-strongly convex w.r.t. $\mg{\cdot}$, in symbols, $w(y) \geq w(x) + \langle \grad w(x), y-x \rangle + \frac 12 \mg{y-x}^2$. The Bregman divergence is defined
         \begin{align*}
-            V_x(y) = w(y) - \langle \grad w(y), y-x \rangle - w(x) 
+            V_x(y) = w(y) - \langle \grad w(x), y-x \rangle - w(x) 
         \end{align*}
         We have $V_x(x) = 0$ and $V_x(y) \geq \frac 12 \mg{x-y}^2 \geq 0$. 
     \end{definition}
@@ -46,9 +46,9 @@
     Mirror descents core lemma is this:
     \begin{lemma}[\cite{allenZhu2016linear}]
         \label{lem:mirror-descent}
-        If $x_{t+1} = \Mirr_{x_t}(\alpha \grad f(x_k))$, then
+        If $x_{t+1} = \Mirr_{x_t}(\alpha \grad f(x_t))$, then
         \begin{align*}
-            \forall u \in Q,\quad \alpha (f(x_t) - f(u)) \leq \alpha \langle \grad f(x_t), x_t-u \rangle \leq \frac{\alpha^2}{2} \mg{\grad f(x_t)} + V_{x_t}(u) - V_{x_{t+1}}(u).
+            \forall u \in Q,\quad \alpha (f(x_t) - f(u)) \leq \alpha \langle \grad f(x_t), x_t-u \rangle \leq \frac{\alpha^2}{2} \mg{\grad f(x_t)}^2 + V_{x_t}(u) - V_{x_{t+1}}(u).
         \end{align*}
     \end{lemma}
     \begin{proof}
@@ -62,7 +62,7 @@
         \end{align*}
         Therefore the above is at most 
         \begin{align*}
-            \langle \alpha \grad f(x_t), x_t - x_{t+1} \rangle + \langle - \grad V_{x_k}(x_{t+1}), x_{t+1} - u \rangle
+            \langle \alpha \grad f(x_t), x_t - x_{t+1} \rangle + \langle - \grad V_{x_t}(x_{t+1}), x_{t+1} - u \rangle
         \end{align*}
         Using the three-point identity
         \begin{align*}
@@ -81,7 +81,7 @@
     Using this, we can prove Mirror Descent converges.
     \begin{lemma}[\cite{allenZhu2016linear}]
         \label{lem:classic-tele}
-        For $\bar x = \frac{1}{T} \sum_{t=0}^{T-1} f(x_t)$, if we choose $\alpha = \sqrt{2\Theta / \rho^2 T}$, we have
+        For $\bar x = \frac{1}{T} \sum_{t=0}^{T-1} x_t$, if we choose $\alpha = \sqrt{2\Theta /(\rho^2 T)}$, we have
         \begin{align*}
             f(\bar x) - f(x^*) \leq \rho \sqrt{\frac{2\Theta }{T}}
         \end{align*}
@@ -93,9 +93,9 @@
         \end{align*}
         Using convexity, $f(\bar x) \leq 1/T \sum_{t=0}^{T-1} f(x_t)$, and recalling that $f$ is $\rho$-Lipschitz continuous, we have
         \begin{align*}
-            f(\bar x) - f(x^*) \leq \frac{\alpha}{2} \rho^2 + \frac{1}{\alpha} \Theta,
+            f(\bar x) - f(x^*) \leq \frac{\alpha}{2} \rho^2 + \frac{1}{T\alpha} \Theta,
         \end{align*}
-        where $\Theta$ is any number satisfying $\Theta \geq V_{x_0}(x^*)$. Now by choosing $\alpha = \sqrt{2\Theta / \rho^2 T}$ to balance the two terms, we are done. 
+        where $\Theta$ is any number satisfying $\Theta \geq V_{x_0}(x^*)$. Now by choosing $\alpha = \sqrt{2\Theta /(\rho^2 T)}$ to balance the two terms, we are done. 
     \end{proof}
 
     \section{Zero-Order Mirror Descent}
@@ -130,7 +130,7 @@
     \end{lemma}
     Notice now that for any $u \in Q$, 
     \begin{align*}
-        \alpha (f(x_t) - f(u)) \leq \alpha \langle \grad f(x_t), x_t - u \rangle  = \alpha \langle \tilde \grad f(x_t), x_t - u \rangle + \alpha \langle \grad f(x_t) - \widetilde{\grad} f(x_t), x_t - u \rangle  
+        \alpha (f(x_t) - f(u)) \leq \alpha \langle \grad f(x_t), x_t - u \rangle  = \alpha \langle \widetilde{\grad} f(x_t), x_t - u \rangle + \alpha \langle \grad f(x_t) - \widetilde{\grad} f(x_t), x_t - u \rangle  
     \end{align*}
     
     For simplicity of exposition in this chapter only we will assume there is no quadratic error and $\widetilde{\grad} f(x_t) = p_tp_t^\top \grad f(x_t)$. Thus the above equals,
@@ -142,19 +142,19 @@
     \section{Concentration Bounds}
     \begin{lemma}
         \label{lem:est-bound}
-        With probability at least $1-\delta$, we have for every $1 \leq t \leq T$,
+        With probability at least $1-\delta$, we have for every $0 \leq t \leq T-1$,
         \begin{align*}
             \mg{p_tp_t^\top \grad f(x_t)} \leq c \sqrt{d} \log(cT/\delta) \mg{\grad f(x_t)}
         \end{align*}
     \end{lemma}
     \begin{proof}
-        By Lemma~\ref{lem:bounded-p-norm}, who's proof is deferred to Chapter~\ref{chap:fosp-eggroll}, the event
+        By Lemma~\ref{lem:bounded-p-norm}, the event
         \begin{align*}
             A_t = \set{\mg{p_t} \leq \sqrt{3d\log(C/\delta)}} 
         \end{align*}
-        has probability at least $1-\delta$. Now, as $p_t^\top \grad f(x_t) \sim \mathcal N(0, \mg{\grad f(x_t)}^2)$ conditional on $\mathcal F_t$, we know that
+        has probability at least $1-\delta$. Now, as $p_t^\top \grad f(x_t) \sim \mathcal N(0, \mg{\grad f(x_t)}^2)$ conditional on $\mathcal F_{t-1}$, we know that
         \begin{align*}
-            \E[\exp(\frac{\mg{p_tp_t \grad f(x_t) \1_A}^2}{t^2})] \leq \E[\exp(\frac{3d \log(C/\delta) |p_t^\top \grad f(x_t)|^2}{t^2})]
+            \E[\exp(\frac{\mg{p_tp_t^\top \grad f(x_t) \1_{A_t}}^2}{t^2})] \leq \E[\exp(\frac{3d \log(C/\delta) |p_t^\top \grad f(x_t)|^2}{t^2})]
         \end{align*}
         Using $\E[e^{\lambda Z^2}] = (1-2\lambda \sigma^2)^{-1/2}$ for $Z \sim \mathcal N(0, \sigma^2)$, we know that
         \begin{align*}
@@ -176,7 +176,7 @@
 
     The main idea behind the rest of this proof is that the mean-0 martingale error
     \begin{align*}
-        \sum_{t=0}^{T-1} \alpha \langle (I-p_kp_k^\top) \grad f(x_k), x_k-u \rangle
+        \sum_{t=0}^{T-1} \alpha \langle (I-p_tp_t^\top) \grad f(x_t), x_t-u \rangle
     \end{align*}
     can hopefully be bounded by the other terms of the equation. In this case, it ends up being the ``energy'' term $V_{x_t}(u)$ and the Lipschitz constant $\rho$. 
 
@@ -184,7 +184,7 @@
     The main lemma which is different from the normal mirror descent bounds is the following.
     \begin{lemma}
         \label{lem:concentration_bounds}
-    Let $\set{\mathcal F_t}$ be a filtration. Assume that $g_t, d_t \in \mathcal F_{t-1}$, and assume $p_t \sim \mathcal N(0,I)$ with $p_t \in \mathcal F_t$, $p_t \perp \mathcal F_{t-1}$. Define
+    Let $\set{\mathcal F_t}$ be a filtration. Assume that $g_t,d_t$ are $\mathcal F_{t-1}$-measurable, and assume $p_t \sim \mathcal N(0,I)$ is $\mathcal F_t$-measurable and independent of $\mathcal F_{t-1}$. Define
     \begin{align*}
         E_\tau = \sum_{t=0}^{\tau-1} g_t^\top (I-p_tp_t^\top) d_t
     \end{align*}
@@ -196,7 +196,7 @@
     \begin{proof}
         For each $t$ let
         \begin{align*}
-            A_t = \set{L_\delta \leq |p_t^\top d_t| \leq \sqrt{3 \log(c/\delta) \mg{d_t}^2}}, \quad \Pt(A_t) \geq 1-\delta
+            A_t = \set{L_\delta\mg{d_t} \leq |p_t^\top d_t| \leq \sqrt{3 \log(c/\delta)}\mg{d_t}}, \quad \Pt(A_t) \geq 1-\delta
         \end{align*}
         Then by a lemma from before we know that $\Et[(I-p_tp_t^\top) d_t ; A_t] = 0$. In particular,
         \begin{align*}
@@ -210,7 +210,7 @@
         \begin{align*}
             (g^\top (I-pp^\top) d)^2 \leq 2(g^\top d)^2 + 2 (g^\top p p^\top d)^2 
         \end{align*} 
-        So, the random variable $Q_t = g_t^\top (I-p_tp_t^\top) d_t \1_{A_t}$ is $24\mg{g_t}^2 \mg{d_t}^2 \log(C/\delta)$ subgaussian and mean 0 given $\mathcal F_t$. Thus by the  (subgaussian) Hoeffding inequality with probability at least $1-\delta$ for any $\theta$,
+        So, the random variable $Q_t = g_t^\top (I-p_tp_t^\top) d_t \1_{A_t}$ is $24\mg{g_t}^2 \mg{d_t}^2 \log(C/\delta)$ subgaussian and mean 0 given $\mathcal F_{t-1}$. Thus by the  (subgaussian) Hoeffding inequality with probability at least $1-\delta$ for any $\theta$,
         \begin{align*}
             \left |\sum_{t=0}^{\tau-1} Q_t  \right|\leq c \theta \sum_{t=0}^{\tau-1} \log(c/\delta) \mg{g_t}^2 \mg{d_t}^2 + \frac 1 \theta \log(\frac{c}{\delta})
         \end{align*}
@@ -233,7 +233,7 @@
 \begin{proof}
     Telescoping Equation~\eqref{eq:telescope}, we get
     \begin{align*}
-        \sum_{t=0}^{\tau-1} \alpha (f(x_t) - f(x^*)) &\leq \sum_{t=0}^{\tau-1} \frac{\alpha^2}{2} \mg{\tilde \grad f(x_t)}^2 + V_{x_0}(x^*) - V_{x_\tau}(x^*) 
+        \sum_{t=0}^{\tau-1} \alpha (f(x_t) - f(x^*)) &\leq \sum_{t=0}^{\tau-1} \frac{\alpha^2}{2} \mg{\widetilde{\grad} f(x_t)}^2 + V_{x_0}(x^*) - V_{x_\tau}(x^*) 
         \\&\quad+ \sum_{t=0}^{\tau-1} \alpha \langle (I-p_tp_t^\top) \grad f(x_t), x_t - x^* \rangle 
     \end{align*}
     Therefore, by the previous discussion, by Lemma~\ref{lem:est-bound} and using that $f(x_t) \geq f(x^*)$ for any $x_t$,
@@ -278,7 +278,7 @@ is around the same size as $V_{x_0}(x^*)$. This observation is what let's us pro
 
 \section{Putting it all Together}
 \begin{theorem}[Zero-Order Mirror Descent Convergence]
-    Let $\bar x = 1/T \sum_{t=0}^{T-1} x_t$, if we choose
+    Let $\bar x = \frac{1}{T} \sum_{t=0}^{T-1} x_t$, if we choose
     \begin{align*}
         \alpha = \sqrt{\frac{2\Theta}{\rho^2 c \chi^{2} T d}}
     \end{align*}
