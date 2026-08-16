@@ -5,7 +5,7 @@
 \label{chap:fosp-eggroll}
 In zeroth-order methods, how do GPU clusters actually share perturbations with each other? \textit{A priori}, they would have to send the full weights of each perturbation to every cluster, which could take prohibitively long due to synchronization requirements. This would effectively eliminate the gains behind evaluating $r$ perturbations in parallel we have discussed in detail above.
 
-\citet{salimans2017evolution} solved this problem by sharing only the pseudorandom seeds used to generate each Gaussian perturbation. Full high-dimensional perturbations can thus be shared between GPUs using only a 32-bit seed, where the receiving GPU subsequently reconstructs the perturbation locally. For the first time, zeroth-order methods, also called Evolutionary Stratregies (ES), was scaled to machine learning models with millions of parameters, using more than one thousand parallel workers. But as we have seen in Chapter~\ref{chap:linear-mixing}, increasing the population size $r$ linearly speeds up the algorithm. A two-times increase in the number of parallel workers yields precisely a two-times speedup in training speed. 
+\citet{salimans2017evolution} solved this problem by sharing only the pseudorandom seeds used to generate each Gaussian perturbation. Full high-dimensional perturbations can then be shared between GPUs using only a 32-bit seed, where the receiving GPU reconstructs the perturbation locally. For the first time, zeroth-order methods, also called Evolutionary Strategies (ES), were scaled to machine learning models with millions of parameters, using more than one thousand parallel workers. But as we have seen in Chapter~\ref{chap:linear-mixing}, increasing the population size $r$ linearly speeds up the algorithm. A twofold increase in the number of parallel workers yields precisely a twofold reduction in training cost. 
 
 The bottleneck now, having solved the problem of sharing the perturbations across GPUs, was memory. Each Gaussian perturbation has $dm$ nonzero entries almost surely, where $dm$ is the dimension of the model. Thus, for population size $r$, each GPU needs to store $O(dm \cdot r)$ parameters. This fundamentally limits how big $r$ can be in practice. 
 
@@ -17,10 +17,10 @@ Furthermore, they prove that as the rank of the perturbations $k\to\infty$,
 \begin{align*}
     \frac{1}{\sigma} \mbb E_{E \sim p(E)}\left[E f\left(X + \sigma E\right)\right] \to \frac{1}{\sigma}\mbb E_{P \sim \mathcal N(0,I_{d \times m})}[f(X+\sigma P)P].
 \end{align*}
-this is because the distribution of $E$ will approach $\mathcal N(0, I_{d \times m})$ with increasing rank. 
+This is because the distribution of $E$ will approach $\mathcal N(0, I_{d \times m})$ with increasing rank. 
 
 \section{Main Result}
-The preceding result suggests that increasing the rank of the perturbations is beneficial, so the resulting distribution becomes Gaussian. The Gaussian distribution is rotationally invariant and the rank-1 update $ab^\top$ is not, maybe we need this property to ``locate'' the gradient. However, this is not true, it turns out that the requirement for convergence is the isotropic condition mentioned previously in Chapter~\ref{chap:preliminaries}. We prove that, despite only using rank-1 perturbations $ab^\top$, not only do we get convergence to a first-order stationary point, but that its speed also scales linearly with the population size. The practical takeaway is that when function evaluations are performed in parallel, twice as much compute converges twice as fast. 
+The preceding result suggests that increasing the rank of the perturbations is beneficial, so the resulting distribution becomes Gaussian. The Gaussian distribution is rotationally invariant and the rank-1 update $ab^\top$ is not, maybe we need this property to ``locate'' the gradient. Rejecting this, we prove that despite only using rank-1 perturbations $ab^\top$, not only does the algorithm converge to a first-order stationary point, but that its speed also scales linearly with the population size. The practical takeaway is that when function evaluations are performed in parallel, twice as much compute converges twice as fast. 
 
 \begin{assumption}[Properties of $f$]
     We suppose that $f: \R^{d \times m} \to \R$ satisfies the following properties:
@@ -34,13 +34,13 @@ The preceding result suggests that increasing the rank of the perturbations is b
 \end{assumption}
 
 \begin{definition}
-    A point $X \in \R^{d \times m}$ is an $\ve$-first order stationary point if 
+    A point $X \in \R^{d \times m}$ is an $\ve$-first-order stationary point if 
     \begin{align*}
         \mg{\grad f(X)}_F \leq \ve
     \end{align*}
 \end{definition}
 
-In this excerpt we work with symmetric EGGROLL, following the low-rank perturbation framework of \citet{sarkar2025evolution}.
+In this chapter we work with symmetric EGGROLL, following the low-rank perturbation framework of \citet{sarkar2025evolution}.
 \begin{definition}[Symmetric EGGROLL Update]
     \label{def:symm-eggroll-update}
     We define a population $r$ symmetric zeroth order estimator as follows:
@@ -62,7 +62,7 @@ In this excerpt we work with symmetric EGGROLL, following the low-rank perturbat
             \gets
             X_t-\eta g_\sigma^r(X_t)$
     \EndFor
-    \State \Return \(X_T\)
+    \State \Return $X_t$ for $t \sim \mathrm{Unif}([0, T-1])$
 \end{algorithmic}
 \end{algorithm}
 
@@ -76,18 +76,18 @@ We state an informal version of the main result.
     \begin{align*}
         T = \tilde{\Omega}\qty(\frac{dmL(f(X_0) - f^*)}{r \ve^2})
     \end{align*}
-    iterations (with each iteration using $2r$ function evaluations), with probability at least $1-\delta$, at least $3/4$ of the iterates are $\ve$-first order stationary points. 
+    iterations (with each iteration using $2r$ function evaluations), with probability at least $1-\delta$, at least $3/4$ of the iterates are $\ve$-first-order stationary points. 
 \end{theorem}
 
-The overall proof strategy follows that of~\citet{ren2023escaping}. The main new ingredient is Theorem~\ref{thm:error_concentration}, which establishes the concentration bound required when full Gaussian perturbations are replaced by rank-one perturbations. The Gaussian argument does not extend to this setting because rank-one perturbations have fat tails, with entries that are sub-exponential rather than sub-gaussian. 
+The overall proof strategy follows that of~\citet{ren2023escaping}. The main new ingredient is Theorem~\ref{thm:error_concentration}, which establishes the concentration bound required when full Gaussian perturbations are replaced by rank-one perturbations. The Gaussian argument does not extend to this setting because rank-one perturbations have fat tails, with entries that are sub-exponential rather than subGaussian. 
 
 \section{Concentration Bounds}
-Here we prove the novel concentration bound about the EGGROLL error. Throughout this excerpt, all norms of matrices is the Frobenius norm
+Here we prove the novel concentration bound about the EGGROLL error. Throughout this chapter, all matrix norms are the Frobenius norm
 \begin{align*}
     \mg{A}_F = \qty(\sum_{i,j} A_{i,j}^2)^{1/2}.
 \end{align*}
 
-Throughout this paper, we denote
+Throughout this chapter, we denote
 \begin{align*}
     \Et[X ; A] \coloneqq \E[X \mathbb I_A \given \mathcal F_{t-1}]
 \end{align*}
@@ -99,15 +99,15 @@ We have seen subGaussian random variables in Chapter~\ref{chap:preliminaries}. H
         \E[\exp(\frac{\mg{X}^2}{3\sigma^2})] \leq 2
     \end{align*}
 \end{definition}
-As an example, $p \sim \mathcal N(0,I_d)$ is $\mathrm{nSG}(\sqrt(d))$. The next lemma is basically a Hoeffding-like inequality for norm-subGaussian random variables. 
+As an example, $p \sim \mathcal N(0,I_d)$ is $\mathrm{nSG}(\sqrt d)$. The next lemma is basically a Hoeffding-like inequality for norm-subGaussian random variables. 
 \begin{lemma}[\cite{jin2019short}]\label{lem:nsg-hoeffding}
-    Let random vectors $X_1, \ldots, X_n \in \R^d$, and corresponding filtrations $\mathcal F_t = \sigma(X_1, \ldots, X_t)$ satisfy that 
+    Let random vectors $X_1, \ldots, X_T \in \R^d$, and corresponding filtrations $\mathcal F_t = \sigma(X_1, \ldots, X_t)$ satisfy that 
     \begin{align*}
         \Et[X_t] = 0, \quad \Pt(\mg{X_t} \geq s) \leq 2e^{-\frac{s^2}{3\sigma_t^2}} \quad \forall s \geq 0
     \end{align*}
-    Then there exists an absolute constant $c$ such for any fixed $\delta > 0, \theta > 0$, with probability at least $1-\delta$,
+    Then there exists an absolute constant $c$ such that for any fixed $\delta > 0, \theta > 0$, with probability at least $1-\delta$,
     \begin{align*}
-        \left\|\sum_{i=1}^n X_i\right\| \leq c\cdot \theta \sum_{i=1}^n \sigma_i^2 + \frac{1}{\theta} \log(\frac{2d}{\delta}).
+        \left\|\sum_{t=1}^T X_t\right\| \leq c\cdot \theta \sum_{t=1}^T \sigma_t^2 + \frac{1}{\theta} \log(\frac{2d}{\delta}).
     \end{align*}
 \end{lemma}
 
@@ -167,7 +167,7 @@ This will help us later.
     \begin{align*}
         \P(X \leq L) \leq \P(X \leq 3d \delta^2) \leq (3e \delta^2)^{d/2} = (\sqrt{3e} \delta)^d
     \end{align*}
-    When $\sqrt{3e} \delta < 1$, this is $< \sqrt{3e} \delta$, otherwise ths bound holds vacuously. Therefore $\P(X \leq L) \leq \sqrt{3e} \delta$. On the other hand, using that for $t < 1/2$,
+    When $\sqrt{3e} \delta < 1$, this is $< \sqrt{3e} \delta$, otherwise this bound holds vacuously. Therefore $\P(X \leq L) \leq \sqrt{3e} \delta$. On the other hand, using that for $t < 1/2$, where $Z \sim \mathcal N(0,I)$,
     \begin{align*}
         \E[e^{t\mg{Z}^2}] = (1-2t)^{-d/2},
     \end{align*}
@@ -178,15 +178,15 @@ This will help us later.
     And thus $\P(A) \geq 1-C\delta$ for the absolute constant $C = \sqrt{3} + \sqrt{3e}$. 
 \end{proof}
 
-Here is the novel concentration bound. The proof is inspired by Proposition 2 of \citet{ren2023escaping} but with many important differences.
+Here we present the novel concentration bound. The proof is loosely inspired by Proposition 2 of \citet{ren2023escaping}, but the majority of the argument is different.
 
 \begin{theorem}
     \label{thm:error_concentration}
-    Let $\set{\mathcal F_t}_{t \geq -1}$ be a filtration, and let $\set{a_t}_{t \geq 0}, \set{b_t}_{t \geq 0} $ be two sequences of independent random vectors such that $a_t \sim \mathcal N(0, I_d)$, $b_t \sim \mathcal N(0, I_m)$, $a_t, b_t \in \mathcal F_t$ and $a_t, b_t$ are independent of $\mathcal F_{t-1}$. Let $\set{V_t}_{t \geq 0}$ be a sequence of random matrices such that $V_t \in \mathcal F_{t-1}$. For each $\tau \geq 0$, let 
+    Let $\set{\mathcal F_t}_{t \geq -1}$ be a filtration, and let $\set{a_t}_{t \geq 0}, \set{b_t}_{t \geq 0} $ be two sequences of independent random vectors such that $a_t \sim \mathcal N(0, I_d)$, $b_t \sim \mathcal N(0, I_m)$, $a_t, b_t \in \mathcal F_t$ and $a_t, b_t$ are independent of $\mathcal F_{t-1}$. Let $\set{V_t}_{t \geq 0}$ be a sequence of random matrices such that $V_t \in \mathcal F_{t-1}$. For each $\tau \geq 1$, let 
     \begin{align*}
         E_\tau = \sum_{t=0}^{\tau-1} \qty(V_t - \langle V_t, a_tb_t^\top \rangle a_t b_t^\top)
     \end{align*}
-    Then, there exists some absolute constants $C > 0, c > 0$ such that for any $\tau \in \bZ^+$, and $0 < \delta < 1/e$, for any $\theta > 0$, with probability at least $1-\delta$ given $\mathcal F_{t-1}$, 
+    Then, there exist some absolute constants $C > 0, c > 0$ such that for any $\tau \in \bZ^+$, and $0 < \delta < 1/e$, for any $\theta > 0$, with probability at least $1-\delta$ given $\mathcal F_{\tau-1}$, 
     \begin{align*}
         \left \|E_{\tau} \right \|_F \leq c \cdot \theta \sum_{t=0}^{\tau-1} dm \log^{3}\qty(\frac{C\tau m}{\delta}) \mg{V_t}_F^2 + \frac{1}{\theta} \log(\frac{Cm^2d \tau}{\delta}).
     \end{align*}
@@ -201,7 +201,7 @@ Here is the novel concentration bound. The proof is inspired by Proposition 2 of
     \begin{align*}
         B_{t,i} = \set{L_\delta < |b_t^\top q_i| < \sqrt{3\log(C/\delta)}}, \quad B_t = \bigcap_{i=1}^m B_{t,i}.
     \end{align*}
-    Let $R$ be an orthogonal matrix $RR^\top = R^\top R = I$, and notice that $Ra$ has the same distribution as $a$, and that $A_t$ is the same event when $\mg{a_t}$ is replaced with $\mg{Ra_t}$. Therefore,
+    Let $R$ be an orthogonal matrix $RR^\top = R^\top R = I$, and notice that $Ra_t$ has the same distribution as $a_t$, and that $A_t$ is the same event when $\mg{a_t}$ is replaced with $\mg{Ra_t}$. Therefore,
     \begin{align*}
         R\Et[a_ta_t^\top ; A_t]R^\top = \Et[(Ra_t)(Ra_t)^\top ; A_t] = \Et[a_ta_t^\top ; A_t]
     \end{align*}
@@ -213,9 +213,9 @@ Here is the novel concentration bound. The proof is inspired by Proposition 2 of
     \begin{align*}
         \alpha d &= \Tr(\Et[a_ta_t^\top ; A_t]) = \Et[\mg{a_t}^2 ; A_t] \\&= \Et[(\mg{a_t}^2 - d) ; A_t] + d \P(A_t) = d\P(A_t)
     \end{align*}
-    The most important fact for this entire proof, is to notice that the events $B_{t,i}$ are indepedent. This is because, since $q_i \perp q_j$ for $i \neq j$, the $b_t^\top q_i$ and $b_t^\top q_j$ are independent given $\mathcal F_{t-1}$. Thus, if $i \neq j$,
+    The most important fact for this entire proof, is to notice that the events $B_{t,i}$ are independent. This is because, since $q_i \perp q_j$ for $i \neq j$, the $b_t^\top q_i$ and $b_t^\top q_j$ are independent given $\mathcal F_{t-1}$. Thus, if $i \neq j$,
     \begin{align*}
-        \Et[(Q^\top b_t)(Q^\top b_t)^\top_{i,j} ; B_t] &= \Et[(q_i^\top b_t) (q_j^\top b_t) ; B_t] 
+        \Et[(Q^\top b_t)(Q^\top b_t)^\top ; B_t]_{i,j} &= \Et[(q_i^\top b_t) (q_j^\top b_t) ; B_t] 
         \\&= \Pt(\bigcap_{k \neq i,j} B_{t,k}) \cdot \Et[q_i^\top b_t ; B_{t,i}] \cdot \Et[q_j^\top b_t ; B_{t,j}] \\
         &= 0
     \end{align*}
@@ -262,7 +262,7 @@ So on $A_t \cap B_t$ we have
 \begin{align*}
     \mg{a_t a_t^\top V_t b_t b_t^\top}_F = |a_t^\top V_t b_t| \mg{a_t} \mg{b_t} \leq |a_t^\top V_t b_t| \sqrt{9md \log^2(C/\delta)}
 \end{align*}
-Our main goal now is to show that $a_t^\top V_t b_t$ is subgaussian with parameter $\widetilde{O}(\mg{V_t}_F)$. To simplify notation, we will drop the $t$s and conditioning, it won't be important for the argument. 
+Our main goal now is to show that $a_t^\top V_t b_t$ is subGaussian with parameter $\widetilde{O}(\mg{V_t}_F)$. To simplify notation, we will drop the $t$s and conditioning, it won't be important for the argument. 
 Recall that for $Z \sim \mathcal N(0, \sigma^2)$, if $t\sigma^2 < \frac 12$,
 \begin{align*}
     \E[e^{t Z^2}] = (1-2t\sigma ^2)^{-1/2}
@@ -292,13 +292,13 @@ We are now almost done. Observe, on the event $B$,
 \end{align*}
 Now, $t\mg{Vb}^2 \leq t 3\mg{V}_F^2 \log(C/\delta)$, so choosing $t = 1/(24\mg{V}_F^2 \log(C/\delta))$, we will satisfy all the bounds above ($\sigma_{\max}(V)^2 \leq \mg{V}_F^2$), and get
 \begin{align*}
-    \E[e^{t(a^\top V b)^2}] = \E[\E[e^{t (a^\top Vb)^2} \mid b]] \leq e^{4t \mg{V}_F^2} \leq \exp(\frac 1{6\log(C/\delta)}) \leq e^{1/6} \leq 2
+    \E[e^{t(a^\top V b \1_{A \cap B})^2}] = \E[\E[e^{t (a^\top Vb \1_{A \cap B})^2} \mid b]] \leq e^{4t \mg{V}_F^2} \leq \exp(\frac 1{6\log(C/\delta)}) \leq e^{1/6} \leq 2
 \end{align*}
-Therefore, $a_t^\top V_t b_t$ is $\mathrm{nSG}(\sqrt{24 \log(C/\delta)} \mg{V_t}_F)$. Combining the previous bounds on $\mg{a}$ and $\mg{b}$, we get
+Therefore, $a_t^\top V_t b_t$ is $\mathrm{nSG}(\sqrt{8 \log(C/\delta)} \mg{V_t}_F)$. Combining the previous bounds on $\mg{a}$ and $\mg{b}$, we get
 \begin{align*}
-    \Et[\exp(\frac{\mg{a_ta_t^\top V_t b_tb_t^\top \1_{A_t \cap B_t}}_F^2}{216 md \log^3(C/\delta)\mg{V_t}_F^2})] \leq 2
+    \Et[\exp(\frac{\mg{a_ta_t^\top V_t b_tb_t^\top \1_{A_t \cap B_t}}_F^2}{c' md \log^3(C/\delta)\mg{V_t}_F^2})] \leq 2
 \end{align*}
-Therefore, using $\mg{Q_t}_F^2 \leq \mg{V_t}_F^2 + \mg{a_ta_t^\top V_t b_tb_t^\top \1_{A_t \cap B_t}}_F$, for some absolute constant $c'$,
+Therefore, using $\mg{Q_t}_F^2 \leq 2\mg{V_t}_F^2 + 2\mg{a_ta_t^\top V_t b_tb_t^\top \1_{A_t \cap B_t}}_F^2$, for some absolute constant $c'$,
 \begin{align*}
     \Et[\exp(\frac{\mg{Q_t}_F^2}{c' md \log^3(C/\delta)\mg{V_t}_F^2})] \leq 2
 \end{align*}
@@ -314,7 +314,7 @@ Now, on $\bigcap_{t=0}^{\tau-1} A_t \cap B_t$,
 \end{align*}
 As $\Pt(B_{t,i}) \geq 1-\delta$, by union bound $\Pt(B_t) \geq 1-m \delta$. Further, recall that $\Pt(A_t) \geq 1-\delta$. Therefore,
 \begin{align*}
-    \Pt(\bigcap_{t=0}^{\tau-1} A_t \cap B_t) \geq 1 - \tau(m+1)\delta
+    \mbb P_{\tau-1} \left(\bigcap_{t=0}^{\tau-1} A_t \cap B_t \right) \geq 1 - \tau(m+1)\delta
 \end{align*}
 so, with probability at least $1-\delta - \tau(m+1)\delta$, 
 \begin{align*}
@@ -343,7 +343,7 @@ We will need the following lemmas.
 \end{lemma}
 We will need to frequently bound sums of $\mg{P_t}^{2k}$. 
 \begin{lemma}\label{lem:noise-norm}
-    Suppose $a_0, \ldots, a_{\tau-1} \sim \mathcal N(0, I_d)$, and $b_0, \ldots, b_{\tau-1} \sim \mathcal N(0, I_m)$. Then for any $k > 0$ there exists absolute constants $c,C > 0$ such that for any $0 < \delta < 1$, w.p. $ \geq 1 -\delta$,
+    Suppose $a_0, \ldots, a_{\tau-1} \sim \mathcal N(0, I_d)$, and $b_0, \ldots, b_{\tau-1} \sim \mathcal N(0, I_m)$. Then for any $k > 0$ there exist absolute constants $c,C > 0$ such that for any $0 < \delta < 1$, w.p. $ \geq 1 -\delta$,
     \begin{align*}
         \sum_{t=0}^{\tau-1} \mg{a_tb_t^\top}^{2k}_F \leq \tau Cc^{2k} d^k m^k (1+\log(1/\delta)^{2k}) 
     \end{align*}
@@ -372,9 +372,9 @@ First, we prove the following crucial lemma.
     \begin{align*}
         g_\sigma^{r}(X_t) \coloneqq \frac{1}{r} \sum_{i=1}^r \frac{f(X_t + \sigma P_{t,i}) - f(X_t - \sigma P_{t,i})}{2\sigma} P_{t,i}
     \end{align*}
-    where $P_{t,i} = a_{t,i}b_{t,i}^\top$ where each $a_{t,i},b_{t,i}$ are drawn i.i.d. from $\mathcal N(0, I_d)$, and $\mathcal N(0, I_m)$ respectively, and $\sigma > 0$ is the smoothing radius.
+    where $P_{t,i} = a_{t,i}b_{t,i}^\top$ and each $a_{t,i},b_{t,i}$ are drawn i.i.d. from $\mathcal N(0, I_d)$, and $\mathcal N(0, I_m)$ respectively, and $\sigma > 0$ is the smoothing radius.
 
-    Then there exists absolute constants $c>0,C \geq 1$ such that, for any $T \in \bZ^+$ and $1 \leq \tau' \leq T$, and $0 < \delta < 1/e$, then upon defining $\mathcal H_{\tau}(\delta)$ to be the event on which the inequality 
+    Then there exist absolute constants $c>0,C \geq 1$ such that, for any $T \in \bZ^+$ and $1 \leq \tau' \leq T$, and $0 < \delta < 1/e$, then upon defining $\mathcal H_{\tau}(\delta)$ to be the event on which the inequality 
     \begin{align*}
         f(X_{\tau}) - f(X_0) &\leq -\frac{\eta}{2} \sum_{t=0}^{\tau-1} \frac{1}{r} \sum_{i=1}^r |\langle \grad f(X_t), P_{t,i} \rangle|^2 + \tau C c^4 \eta \sigma^2 L^2(dm)^2 \log(\frac T\delta)^4 \\
     &\quad + \eta^2 \frac{cdm\chi^4}{r} \sum_{t=0}^{\tau-1} \mg{\grad f(X_t)}^2 + \eta^2 \tau C c^6  \sigma^2 L^3 (dm)^3 \log(\frac T \delta)^6
@@ -387,7 +387,7 @@ holds, (where $\chi \coloneqq \log(Cm^2 drT/\delta)$), we have
 \begin{proof}
 For each $t \in \set{-1, \ldots, \tau}$, let
 \begin{align*}
-    \mathcal F_t = \sigma(X_0, \set{a_{0,i}}_{i=1}^r, \ldots, \set{a_{t,i}}_{i=1}^r, \set{b_{0,i}}_{i=1}^r, \ldots, \set{b_{t,i}}_{i=1}^r)        
+    \mathcal F_{-1} = \sigma(X_0), \quad \mathcal F_t = \sigma \left(X_0, \set{a_{0,i}}_{i=1}^r, \ldots, \set{a_{t,i}}_{i=1}^r, \set{b_{0,i}}_{i=1}^r, \ldots, \set{b_{t,i}}_{i=1}^r \right)        
 \end{align*}
 be the sigma-algebra containing the information available at time $t$, and as usual write $P_{t,i} = a_{t,i}b_{t,i}^\top$. 
 
@@ -481,9 +481,9 @@ We will need the following Bernstein inequality for sub-exponential random varia
 
 We then prove the following lemma.
 \begin{lemma}\label{lem:block-progress}
-    There exists an absolute constant $c_2 \geq 1$ such that, if
+    There exists an absolute constant $c_2 \geq 1$ such that, if $\delta > 0$ and
     \begin{align*}
-        t_f(\delta) \geq c'' \frac{1}{r}\log(\frac{T}{\delta}) \log^2\left(\frac{Ct_f(\delta)rm T}{\delta} \right), \quad \delta > 0,
+        t_f(\delta) \geq c_2 \frac{1}{r}\log(\frac{T}{\delta}) \log^2\left(\frac{Ct_f(\delta)rm T}{\delta} \right), \quad t_f(\delta) \in \bZ,
     \end{align*}
     and 
     \begin{align*}
@@ -496,7 +496,7 @@ We then prove the following lemma.
     for $0 < \delta < 1$, $t_0 \geq 0$ and $k \geq t_f(\delta)$. Note that $t_f(\delta) = \widetilde{O}(1)$. 
 \end{lemma}
 \begin{proof}
-    By using the same technique from the proof of Theorem~\ref{thm:error_concentration}, taking the SVD of $V = P \Sigma Q^\top = \sum_{i=1}^s \sigma_i p_i q_i^\top$, upon defining
+    By using the same technique from the proof of Theorem~\ref{thm:error_concentration}, taking the SVD of $\grad f(X_t) = P \Sigma Q^\top = \sum_{i=1}^s \sigma_i p_i q_i^\top$, upon defining
     \begin{align*}
         B_{i,j}^t = \set{L_\delta < |b_{t,i}^\top q_j| < \sqrt{3\log(CkrmT/\delta)}}, \quad B_{t,i} = \bigcap_{j=1}^m B_{i,j}^t
     \end{align*}
@@ -619,11 +619,11 @@ Denote
     holds with probability at least $1-\delta/T$ for $0 < \delta \leq 1/e$. 
 \end{lemma}
 \begin{proof}
-    Obvious from Lemma~\ref{lem:noise-norm} and the Cauchy-Schwarz inequality.
+    This is immediate from Lemma~\ref{lem:noise-norm} and the Cauchy-Schwarz inequality.
 \end{proof}
 
 \begin{lemma}\label{lem:gradient-dominates}
-    Let $0 < \delta \leq 1/e$ and $T \in \bZ^+$ such that $T > 2t_f(\delta) + 1$. Consider any positive integer $t_f' \leq 2t_f(\delta)$ and $t_0 \in \set{0, \ldots, T-1-t_f'}$. Suppose $\eta$ satifies~\eqref{eq:gradient-change-step-size}. Then on the event 
+    Let $0 < \delta \leq 1/e$ and $T \in \bZ^+$ such that $T > 2t_f(\delta) + 1$. Consider any positive integer $t_f' \leq 2t_f(\delta)$ and $t_0 \in \set{0, \ldots, T-1-t_f'}$. Suppose $\eta$ satisfies~\eqref{eq:gradient-change-step-size}. Then on the event 
     \begin{align*}
         \mathcal E^c(t_0, t_f', \delta) \cap \qty(\bigcap_{t=t_0}^{t_0+t_f'-1} \mathcal A_t(\delta)) \cap \qty(\bigcap_{t=t_0}^{t_0+t_f'-1} \mathcal G_t(\delta))
     \end{align*}
@@ -649,7 +649,7 @@ Denote
     On the other hand, for $t \in \set{t', \ldots, t_0+t_f'-2}$, by using definition of $\mathcal A_t(\delta)$ and $\mathcal G_t(\delta)$, we get
     \begin{align*}
         \mg{\grad f(X_{t+1})} &\leq \qty(1 + \frac{1}{8t_f(\delta)})\mg{\grad f(X_t)} + \eta \sigma L^2 c(dm)^{3/2} \log(T/\delta)^3
-        \\&=\qty(1+\frac{1}{8t_f(\delta)})^{t+1-t'} \mg{\grad f(X_{t'})} 
+        \\&\leq \qty(1+\frac{1}{8t_f(\delta)})^{t+1-t'} \mg{\grad f(X_{t'})} 
         \\&\quad + \sum_{i=0}^{t-t'} \qty(1+\frac{1}{8t_f(\delta)})^{t-t'-i} \eta \sigma L^2 c(dm)^{3/2} \log(T/\delta)^3 \\
         &\leq \qty(1+\frac{1}{8t_f(\delta)})^{t_f'} \mg{\grad f(X_{t'})}
         \\&\quad + 8t_f(\delta) \qty(\qty(1+\frac{1}{8t_f(\delta)})^{t_f'} - 1) \eta \sigma L^2 c(dm)^{3/2} \log(T/\delta)^3 \\
@@ -667,7 +667,7 @@ We are now almost ready to prove the main theorem. But first, we need the follow
 \begin{lemma}[Function change for large $\tau$]\label{lem:function-change-for-large-tau}
     Let $0 < \delta \leq 1/e$ and let $\tau \geq t_f(\delta)$ be arbitrary. Split $\set{0, \ldots, \tau-1}$ into $K \coloneqq \tau/t_f(\delta)$ intervals $J_0, \ldots, J_{K-1}$ of size $t_f(\delta)$. Let $I_1$ denote the set of indices where the gradient always dominates the noise term in $J_k$, i.e.
     \begin{align*}
-        I_1 \coloneqq \set{k \,:\, \mg{\grad f(X_t)} \geq 8t_f(\delta) \eta \sigma L^2 \frac 1r \sum_{i=1}^r \mg{P_{t,i}}^3  \text{ for all $t \in J_k$}}
+        I_1 \coloneqq \set{0 \leq k \leq K-1 \,:\, \mg{\grad f(X_t)} \geq 8t_f(\delta) \eta \sigma L^2 \frac 1r \sum_{i=1}^r \mg{P_{t,i}}^3  \text{ for all $t \in J_k$}}
     \end{align*}
     Suppose we choose $\eta$ satisfying
     \begin{align*}
@@ -706,12 +706,12 @@ We are now almost ready to prove the main theorem. But first, we need the follow
     \end{align*}
     Therefore, using an average,
     \begin{align*}
-        \frac 14 \sum_{t \in J_k} \frac 1r \sum_{i=1}^r |\langle P_{t,i}, \grad f(X_t) \rangle|^2 &\geq \frac 14 \min_{t \in J_k} \mg{\grad f(X_t)}^2 \geq \frac{1}{64} \max_{t \in J_k} \mg{\grad f(X_t)}^2
-        \\& \geq \frac{1}{64t_f(\delta)} \sum_{t\in J_k} \mg{\grad f(X_t)}^2
+        \frac 14 \sum_{t \in J_k} \frac 1r \sum_{i=1}^r |\langle P_{t,i}, \grad f(X_t) \rangle|^2 &\geq \frac 18 \min_{t \in J_k} \mg{\grad f(X_t)}^2 \geq \frac{1}{128} \max_{t \in J_k} \mg{\grad f(X_t)}^2
+        \\& \geq \frac{1}{128t_f(\delta)} \sum_{t\in J_k} \mg{\grad f(X_t)}^2
     \end{align*}
     By choosing 
     \begin{align*}
-        \frac{\eta cdm \chi^4}{r} \leq \frac{1}{64 t_f(\delta)}
+        \frac{\eta cdm \chi^4}{r} \leq \frac{1}{128 t_f(\delta)}
     \end{align*}
     we have
     \begin{align*}
@@ -775,7 +775,7 @@ We are now almost ready to prove the main theorem. But first, we need the follow
     \begin{align*}
         16 t_f(\delta) \eta \sigma L^2 c(dm)^{3/2} \log(T/\delta)^3 < \ve
     \end{align*}
-    While by Lemma~\ref{lem:gradient-dominates}, if $k \in I_1^c$, 
+    While by Lemma~\ref{lem:gradient-dominates}, if $k \in I_1^c$ and $t \in J_k$,
     \begin{align*}
         \mg{\grad f(X_t)} \leq 16 t_f(\delta) \eta \sigma L^2 c(dm)^{3/2} \log(T/\delta)^3
     \end{align*}
@@ -785,7 +785,7 @@ We are now almost ready to prove the main theorem. But first, we need the follow
     \end{align*}
     This implies that for any $k \in I_\ve$, $\min_{t \in J_k} \mg{\grad f(X_t)}^2 \geq \frac{1}{16} \ve^2$, and consequently,
     \begin{align*}
-        -\sum_{k \in I_1} \frac{\eta}{4} \min_{t \in J_k} \mg{\grad f(X_t)}^2 \leq -\sum_{k \in I_\ve} \frac{\eta}{2} \cdot \frac{\ve^2}{16} \leq -\frac{T}{4t_f(\delta)} \cdot \frac{\eta}{4} \cdot \frac{\ve^2}{16} = -\frac{T \eta \ve^2}{256 t_f(\delta)}
+        -\sum_{k \in I_1} \frac{\eta}{4} \min_{t \in J_k} \mg{\grad f(X_t)}^2 \leq -\sum_{k \in I_\ve} \frac{\eta}{4} \cdot \frac{\ve^2}{16} \leq -\frac{T}{4t_f(\delta)} \cdot \frac{\eta}{4} \cdot \frac{\ve^2}{16} = -\frac{T \eta \ve^2}{256 t_f(\delta)}
     \end{align*}
     Hence,
     \begin{align*}

@@ -1,4 +1,4 @@
-\begin{thebibliography}{38}
+\begin{thebibliography}{40}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -93,6 +93,11 @@ Nikolaus Hansen and Andreas Ostermeier.
 \newblock Completely derandomized self-adaptation in evolution strategies.
 \newblock \emph{Evolutionary Computation}, 9\penalty0 (2):\penalty0 159--195, 2001.
 
+\bibitem[He et~al.(2024)He, Pan, Wang, and Jiang]{he2024riemannian}
+Chang He, Zhaoye Pan, Xiao Wang, and Bo~Jiang.
+\newblock Riemannian accelerated zeroth-order algorithm: Improved robustness and lower query complexity.
+\newblock In \emph{Proceedings of the 41st International Conference on Machine Learning}, volume 235 of \emph{Proceedings of Machine Learning Research}, pages 17972--18009. PMLR, 2024.
+
 \bibitem[Jin et~al.(2017{\natexlab{a}})Jin, Ge, Netrapalli, Kakade, and Jordan]{jin2017escape}
 Chi Jin, Rong Ge, Praneeth Netrapalli, Sham~M. Kakade, and Michael~I. Jordan.
 \newblock How to escape saddle points efficiently.
@@ -186,6 +191,12 @@ Zhaolin Ren, Yujie Tang, and Na~Li.
 \newblock Escaping saddle points in zeroth-order optimization: The power of two-point estimators.
 \newblock In \emph{Proceedings of the 40th International Conference on Machine Learning}, 2023.
 \newblock URL \url{https://arxiv.org/abs/2209.13555}.
+
+\bibitem[Robbins and Monro(1951)]{robbins1951stochastic}
+Herbert Robbins and Sutton Monro.
+\newblock A stochastic approximation method.
+\newblock \emph{The Annals of Mathematical Statistics}, 22\penalty0 (3):\penalty0 400--407, 1951.
+\newblock \doi{10.1214/aoms/1177729586}.
 
 \bibitem[Salimans et~al.(2017)Salimans, Ho, Chen, Sidor, and Sutskever]{salimans2017evolution}
 Tim Salimans, Jonathan Ho, Xi~Chen, Szymon Sidor, and Ilya Sutskever.

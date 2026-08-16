@@ -3,7 +3,7 @@
 \chapter{Zeroth-Order Mirror Descent}
 \label{chap:zo-mirror-descent}
 
-    Gradient descent iteravely takes a step in the gradient direction, gradually reducing function value. It successively builds better and better upper bounds on $f(x^*)$. However, it ignores the dual problem of finding lower bounds on $f(x^*)$. For convex functions, we have for all $u \in \R^d$,
+    Gradient descent iteratively takes a step in the gradient direction, gradually reducing function value. It successively builds better and better upper bounds on $f(x^*)$. However, it ignores the dual problem of finding lower bounds on $f(x^*)$. For convex functions, we have for all $u \in \R^d$,
     \begin{align*}
         f(u) \geq f(x) + \langle \grad f(x), u - x \rangle
     \end{align*}
@@ -16,7 +16,7 @@
     \begin{align*}
         f(\overline x) - f(u) \leq \frac{1}{T} \sum_{t=0}^{T-1} \langle \grad f(x_t), x_t - u \rangle \eqqcolon R_T(u)
     \end{align*}
-    $R_T(u)$, using terminology from online learing, is referred to as the regret. Consider  a reguarlized version 
+    $R_T(u)$, using terminology from online learning, is referred to as the regret. To alleviate $\sup_u R_T(u) = \infty$, we consider a regularized version 
     \begin{align*}
         \widetilde R_T(u) = \frac{1}{T} \left(-\frac{w(u)}{\alpha} + \sum_{t=0}^{T-1} \langle \grad f(x_t), x_t - u \rangle \right)
     \end{align*}
@@ -43,7 +43,7 @@
         \end{align*}
     \end{definition}
 
-    Mirror descents core lemma is this:
+    Mirror descent's core lemma is this:
     \begin{lemma}[\cite{allenZhu2016linear}]
         \label{lem:mirror-descent}
         If $x_{t+1} = \Mirr_{x_t}(\alpha \grad f(x_t))$, then
@@ -56,7 +56,7 @@
         \begin{align*}
             \alpha \langle \grad f(x_t), x_t - u \rangle = \langle \alpha \grad f(x_t), x_t-x_{t+1} \rangle + \langle \alpha \grad f(x_t), x_{t+1} - u \rangle
         \end{align*}
-        Since $Q$ is convex and $x_{t+1} = \Mirr_{x_t}(\alpha \grad f(x))$ is minimal, it satisfies the first order condition
+        Since $Q$ is convex and $x_{t+1} = \Mirr_{x_t}(\alpha \grad f(x_t))$ is minimal, it satisfies the first-order condition
         \begin{align*}
             \langle \grad V_{x_t}(x_{t+1}) + \alpha \grad f(x_t), u - x_{t+1} \rangle \geq 0 \quad \forall u \in Q
         \end{align*}
@@ -81,7 +81,7 @@
     Using this, we can prove Mirror Descent converges.
     \begin{lemma}[\cite{allenZhu2016linear}]
         \label{lem:classic-tele}
-        For $\bar x = \frac{1}{T} \sum_{t=0}^{T-1} x_t$, if we choose $\alpha = \sqrt{2\Theta /(\rho^2 T)}$, we have
+        For $\bar x = \frac{1}{T} \sum_{t=0}^{T-1} x_t$, if we choose $\alpha = \sqrt{2\Theta /(\rho^2 T)}$, given $\Theta \geq V_{x_0}(x^*)$, we have
         \begin{align*}
             f(\bar x) - f(x^*) \leq \rho \sqrt{\frac{2\Theta }{T}}
         \end{align*}
@@ -98,10 +98,10 @@
         where $\Theta$ is any number satisfying $\Theta \geq V_{x_0}(x^*)$. Now by choosing $\alpha = \sqrt{2\Theta /(\rho^2 T)}$ to balance the two terms, we are done. 
     \end{proof}
 
-    \section{Zero-Order Mirror Descent}
+    \section{Zeroth-Order Mirror Descent}
     In this section, we assume that the norm $\mg{\cdot}$ is the $\ell^2$ norm and $Q = \R^d$. We begin by introducing the zeroth-order gradient estimator.
-    \begin{definition}[Zero-Order Estimator]
-        The Zero-Order gradient estimator is defined as follows
+    \begin{definition}[Zeroth-Order Estimator]
+        The zeroth-order gradient estimator is defined as follows
         \begin{align*}
             \widetilde{\grad} f(x) = \frac{f(x+\sigma p) - f(x-\sigma p)}{2\sigma} \cdot p
         \end{align*}
@@ -109,7 +109,7 @@
     \end{definition}
     The main result of this chapter is the following.
     \begin{theorem}[informal]
-        With iterates defined as $x_{t+1} = \Mirr_{x_t}(\alpha \widetilde \grad f(x_t))$, where the perturbation sampled at time $t$ is independent from the past, if $f$ is quadratic and
+        With iterates defined as $x_{t+1} = \Mirr_{x_t}(\alpha \widetilde \grad f(x_t))$, where the perturbation sampled at time $t$ is independent of the past, if $f$ is quadratic and
         \begin{align*}
             \alpha = \widetilde{O}\left(\sqrt{\frac{\Theta}{\rho^2 T d}}\right)
         \end{align*}
@@ -118,7 +118,7 @@
             f(\overline x) - f^* \leq \widetilde{O}\left(\sqrt{\frac{d\Theta \rho^2}{T}}\right).
         \end{align*}
     \end{theorem}
-    This matches the convergence rate of Mirror descent presented in~\cite{allenZhu2016linear}, up to the zero-order $d$ penalty and log factors.
+    This matches the convergence rate of Mirror descent presented in~\cite{allenZhu2016linear}, up to the zeroth-order $d$ penalty and log factors.
 
     \section{Regret Bound}
     Now, notice that the only place in the proof of Lemma~\ref{lem:mirror-descent} where we used that the update is evaluated at the true gradient $\grad f(x_t)$ was to upper bound $f(x_t) - f(u)$. The gradient was not used in the proof, actually. So we get this lemma for free:
@@ -154,25 +154,24 @@
         \end{align*}
         has probability at least $1-\delta$. Now, as $p_t^\top \grad f(x_t) \sim \mathcal N(0, \mg{\grad f(x_t)}^2)$ conditional on $\mathcal F_{t-1}$, we know that
         \begin{align*}
-            \E[\exp(\frac{\mg{p_tp_t^\top \grad f(x_t) \1_{A_t}}^2}{t^2})] \leq \E[\exp(\frac{3d \log(C/\delta) |p_t^\top \grad f(x_t)|^2}{t^2})]
+            \E[\exp(\frac{\mg{p_tp_t^\top \grad f(x_t) \1_{A_t}}^2}{s^2})] \leq \E[\exp(\frac{3d \log(C/\delta) |p_t^\top \grad f(x_t)|^2}{s^2})]
         \end{align*}
         Using $\E[e^{\lambda Z^2}] = (1-2\lambda \sigma^2)^{-1/2}$ for $Z \sim \mathcal N(0, \sigma^2)$, we know that
         \begin{align*}
-            \E[\exp(\frac{3d \log(C/\delta) |p_t^\top \grad f(x_t)|^2}{t^2}) \mid \mathcal F_t] = \left(1 - \frac{6d \log(C/\delta)\mg{\grad f(x_t)}^2}{t^2}\right)^{-1/2}
+            \Et[\exp(\frac{3d \log(C/\delta) |p_t^\top \grad f(x_t)|^2}{s^2})] = \left(1 - \frac{6d \log(C/\delta)\mg{\grad f(x_t)}^2}{s^2}\right)^{-1/2}
         \end{align*}
-        The RHS is $\leq 2$ for $t = \sqrt{8d \log(C/\delta)}\mg{\grad f(x_t)}$. By taking expectations on both sides this bound also holds unconditionally. Then using Markov's inequality,
+        The RHS is $\leq 2$ for $s = \sqrt{8d \log(C/\delta)}\mg{\grad f(x_t)}$. By taking expectations on both sides this bound also holds unconditionally. Then using Markov's inequality,
         \begin{align*}
-            &\P(\mg{p_tp_t^\top \grad f(x_t) \1_A} \geq \sqrt{8d \log(C/\delta)}\mg{\grad f(x_t)} \lambda) 
-            \\&= \P(\exp(\frac{\mg{p_tp_t^\top \grad f(x_t) \1_A}^2}{8d \log(C/\delta) \mg{\grad f(x_t)}^2}) \geq e^{\lambda^2}) \leq 2e^{-\lambda^2}
+            &\P(\mg{p_tp_t^\top \grad f(x_t) \1_{A_t}} \geq \sqrt{8d \log(C/\delta)}\mg{\grad f(x_t)} \lambda) 
+            \\&= \P(\exp(\frac{\mg{p_tp_t^\top \grad f(x_t) \1_{A_t}^2}}{8d \log(C/\delta) \mg{\grad f(x_t)}^2}) \geq e^{\lambda^2}) \leq 2e^{-\lambda^2}
         \end{align*}
         Now choosing $\lambda = \sqrt{\log(C/\delta)}$, possibly changing $C$ to ensure $C \geq 2$, we have, with probability at least $1-\delta$ on $A$,
         \begin{align*}
             \mg{p_tp_t^\top \grad f(x_t)} \leq \log(C/\delta)\sqrt{8d}\mg{\grad f(x_t)} 
         \end{align*}
-        Since $A$ has probability at least $1-\delta$, this bound holds with probability at least $1-2\delta$. Rescaling $\delta \gets \delta/2$ and changing the absolute constant yields the lemma.
+        Since $A_t$ has probability at least $1-\delta$, this bound holds with probability at least $1-2\delta$. Rescaling $\delta \gets \delta/2T$ and changing the absolute constant yields the lemma.
     \end{proof}
-    This lemma highlights the main technique for creating concentration bounds when the underlying distribution has fat tails. The first thing you do is truncate with high probability, and prove the resulting random variable has similar scale (whether that be sub-gaussian, sub-exponential, etc.) as what you want, up to log factors.
-
+    This lemma highlights the main technique for creating concentration bounds when the underlying distribution has fat tails. The first thing you do is truncate with high probability, and prove the resulting random variable has similar scale (whether that be subGaussian, sub-exponential, etc.) as what you want, up to log factors.
 
     The main idea behind the rest of this proof is that the mean-0 martingale error
     \begin{align*}
@@ -184,11 +183,11 @@
     The main lemma which is different from the normal mirror descent bounds is the following.
     \begin{lemma}
         \label{lem:concentration_bounds}
-    Let $\set{\mathcal F_t}$ be a filtration. Assume that $g_t,d_t$ are $\mathcal F_{t-1}$-measurable, and assume $p_t \sim \mathcal N(0,I)$ is $\mathcal F_t$-measurable and independent of $\mathcal F_{t-1}$. Define
+    Let $\set{\mathcal F_t}$ be a filtration. Assume that $g_t,d_t \in \R^d$ are $\mathcal F_{t-1}$-measurable, and assume $p_t \sim \mathcal N(0,I)$ is $\mathcal F_t$-measurable and independent of $\mathcal F_{t-1}$. Define
     \begin{align*}
         E_\tau = \sum_{t=0}^{\tau-1} g_t^\top (I-p_tp_t^\top) d_t
     \end{align*}
-    Then for any $\theta$, $0 < \delta < 1/e$, with probability at least $1-\delta$,
+    Then for any $\theta > 0$, $0 < \delta < 1/e$, with probability at least $1-\delta$, for some absolute constant $c$,
     \begin{align*}
         |E_\tau| \leq c\theta \sum_{t=0}^{\tau-1} \log(\frac{c\tau}{\delta}) \mg{g_t}^2 \mg{d_t}^2 + \frac1\theta \log(\frac {c\tau}{\delta}).
     \end{align*}
@@ -204,19 +203,19 @@
         \end{align*} 
         Dropping the subscript $t$ for simplicity,
         \begin{align*}
-            \E[\exp(\frac{(g^\top p p^\top d \1_A)^2}{t^2})] \leq \E[\exp(\frac{3 \log(C/\delta) \mg{d_t}^2(p^\top g)^2}{t^2})]
+            \E[\exp(\frac{(g^\top p p^\top d \1_A)^2}{t^2})] \leq \E[\exp(\frac{3 \log(C/\delta) \mg{d}^2(p^\top g)^2}{t^2})]
         \end{align*}
         Now, $p^\top g$ is $\mathcal N(0, \mg{g}^2)$ random variable. Therefore, $\E[\exp((p^\top g)^2 / 4\mg{g}^2)] \leq 2$. Now, taking $c \geq 1$ and $0 < \delta \leq 1/e$, we have
         \begin{align*}
             (g^\top (I-pp^\top) d)^2 \leq 2(g^\top d)^2 + 2 (g^\top p p^\top d)^2 
         \end{align*} 
-        So, the random variable $Q_t = g_t^\top (I-p_tp_t^\top) d_t \1_{A_t}$ is $24\mg{g_t}^2 \mg{d_t}^2 \log(C/\delta)$ subgaussian and mean 0 given $\mathcal F_{t-1}$. Thus by the  (subgaussian) Hoeffding inequality with probability at least $1-\delta$ for any $\theta$,
+        So, the random variable $Q_t = g_t^\top (I-p_tp_t^\top) d_t \1_{A_t}$ is $\sqrt{24\mg{g_t}^2 \mg{d_t}^2 \log(C/\delta)}$ subGaussian and mean 0 given $\mathcal F_{t-1}$. Thus by the  (subGaussian) Hoeffding inequality with probability at least $1-\delta$ for any $\theta$,
         \begin{align*}
             \left |\sum_{t=0}^{\tau-1} Q_t  \right|\leq c \theta \sum_{t=0}^{\tau-1} \log(c/\delta) \mg{g_t}^2 \mg{d_t}^2 + \frac 1 \theta \log(\frac{c}{\delta})
         \end{align*}
         Now $\sum_{t=0}^{\tau-1} Q_t  = E_\tau$ on $\bigcap A_t$. Notice, since $\P(A_t) \geq 1-\delta$, $\P(\bigcap A_t) \geq 1-\tau \delta$. Therefore with probability at least $1-(\tau+1) \delta$, $E_\tau$ satisfies the same bound as above. Rescaling $\delta$ to $\delta/(\tau+1)$ and we have completed the proof.
     \end{proof}
-    This above lemma is the key for making the argument work. Because $V_x(y) \geq \frac 12 \mg{x-y}^2$, and recalling that $f$ is $\rho$-Lipschitz continuous, we have
+    The preceding lemma is the key for making the argument work. Because $V_x(y) \geq \frac 12 \mg{x-y}^2$, and recalling that $f$ is $\rho$-Lipschitz continuous, we have
     \begin{align*}
         \left|\sum_{t=0}^{\tau-1} \alpha \langle (I-p_tp_t^\top) \grad f(x_t), x_t - u \rangle \right| \leq \alpha\sqrt{c \sum_{t=0}^{\tau-1} \log^2(c\tau/\delta) \rho^2 V_{x_t}(u)}
     \end{align*}
@@ -242,7 +241,7 @@
     \end{align*}
     We can have this hold jointly for all $ 1 \leq \tau \leq T$ by rescaling $\delta \gets \delta/T$. Then by using $\tau \leq T$, we arrive at the statement of the lemma.
 \end{proof}
-Naturally, this above lemma should tell us how much $V_{x_t}(x^*)$ can grow. This next lemma tells us an upper bound on how much that is.
+Naturally, the above lemma should tell us how much $V_{x_t}(x^*)$ can grow. This next lemma tells us an upper bound on how much that is.
 \begin{lemma}
     Let $\Theta$ be any upper bound on $V_{x_0}(x^*)$. Then for some absolute constant $c$,
     \begin{align*}
@@ -266,7 +265,7 @@ Naturally, this above lemma should tell us how much $V_{x_t}(x^*)$ can grow. Thi
     \end{align*}
     for some absolute constant $c$ as desired.
 \end{proof}
-A natural question is: Is this a good bound at all? Shouldn't $x_t$ be getting closer to the minmizer $x^*$? But we showed $V_{x_t}(x^*)$ grows linearly? 
+A natural question is: Is this a good bound at all? Shouldn't $x_t$ be getting closer to the minimizer $x^*$? But we showed $V_{x_t}(x^*)$ grows linearly? 
 
 To answer this, recall from before that $\alpha = \sqrt{2\Theta / \rho^2 T}$. Ignoring the polylog factor $\chi^{3/2}$, and dimension $d$, we have actually shown that $V_{x_t}(x^*)$ stays bounded. But still, shouldn't it be decreasing to 0? Actually, it should not, since $f$ could have many minimizers. The best bound you could hope to satisfy for every $f$ is that it is just bounded. 
 
@@ -274,10 +273,10 @@ For a similar choice of $\alpha$, this tells us the accumulated error
 \begin{align*}
     \sum_{t=0}^{T-1} \alpha \langle (I-p_tp_t^\top) \grad f(x_t), x_t-x^* \rangle
 \end{align*}
-is around the same size as $V_{x_0}(x^*)$. This observation is what let's us prove convergence of Zero-Order mirror descent.
+is around the same size as $V_{x_0}(x^*)$. This observation is what lets us prove convergence of zeroth-order mirror descent.
 
 \section{Putting it all Together}
-\begin{theorem}[Zero-Order Mirror Descent Convergence]
+\begin{theorem}[Zeroth-Order Mirror Descent Convergence]
     Let $\bar x = \frac{1}{T} \sum_{t=0}^{T-1} x_t$, if we choose
     \begin{align*}
         \alpha = \sqrt{\frac{2\Theta}{\rho^2 c \chi^{2} T d}}
@@ -318,4 +317,4 @@ is around the same size as $V_{x_0}(x^*)$. This observation is what let's us pro
     \end{align*}
 \end{proof}
 
-The extension of this anaslysis to the setting without quadratic error is left to future work. The main purpose of this chapter was not merely to show that mirror descent converges, but to determine whether zeroth-order mirror descent can be analyzed with the zeroth-order gradient estimator. Having answered this question affirmatively, the techniques developed here will be applied extensively in the next chapter.
+The extension of this analysis to the setting without quadratic error is left to future work. The main purpose of this chapter was not merely to show that mirror descent converges, but to determine whether zeroth-order mirror descent can be analyzed with the zeroth-order gradient estimator. Having answered this question affirmatively, the techniques developed here will be applied extensively in the next chapter.
